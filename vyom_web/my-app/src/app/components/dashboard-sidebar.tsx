@@ -48,14 +48,7 @@ export function DashboardSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Queries">
-                  <Link href="/queries">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Queries</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Performance">
                   <Link href="/performance">
@@ -74,7 +67,7 @@ export function DashboardSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Video Calls">
-                  <Link href="/video-calls">
+                  <Link href="/videocall">
                     <Video className="h-4 w-4" />
                     <span>Video Calls</span>
                   </Link>

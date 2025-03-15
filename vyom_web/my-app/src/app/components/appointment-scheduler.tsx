@@ -13,6 +13,8 @@ import {
   Users,
   FileText,
   AlertCircle,
+  Save,
+  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -53,18 +55,7 @@ const representatives: Representative[] = [
     expertise: ["Loans", "Mortgages", "Investments"],
     avatar: "/placeholder.svg?height=40&width=40",
   },
-  {
-    id: "rep2",
-    name: "Sarah Johnson",
-    expertise: ["Credit Cards", "Personal Banking", "Savings"],
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
-  {
-    id: "rep3",
-    name: "Michael Rodriguez",
-    expertise: ["Fraud Resolution", "Dispute Management", "Security"],
-    avatar: "/placeholder.svg?height=40&width=40",
-  },
+  
 ]
 
 const mockAppointments: Appointment[] = [
@@ -77,45 +68,10 @@ const mockAppointments: Appointment[] = [
     startTime: "8:00AM",
     endTime: "9:15AM",
     representative: "John Carpenter",
-    status: "scheduled",
+    status: "scheduled" as "scheduled",
     color: "bg-purple-100 border-purple-300",
   },
-  {
-    id: "apt2",
-    customerName: "David Thompson",
-    customerPhone: "+1 (555) 987-6543",
-    customerEmail: "david.thompson@example.com",
-    appointmentType: "Loan Application Review",
-    startTime: "7:15AM",
-    endTime: "8:00AM",
-    representative: "Sarah Johnson",
-    status: "scheduled",
-    color: "bg-green-100 border-green-300",
-  },
-  {
-    id: "apt3",
-    customerName: "Sophia Martinez",
-    customerPhone: "+1 (555) 456-7890",
-    customerEmail: "sophia.martinez@example.com",
-    appointmentType: "Credit Card Dispute",
-    startTime: "7:15AM",
-    endTime: "8:15AM",
-    representative: "Michael Rodriguez",
-    status: "scheduled",
-    color: "bg-blue-100 border-blue-300",
-  },
-  {
-    id: "apt4",
-    customerName: "James Wilson",
-    customerPhone: "+1 (555) 234-5678",
-    customerEmail: "james.wilson@example.com",
-    appointmentType: "Investment Portfolio Review",
-    startTime: "8:30AM",
-    endTime: "9:15AM",
-    representative: "Sarah Johnson",
-    status: "scheduled",
-    color: "bg-green-100 border-green-300",
-  },
+
   {
     id: "apt5",
     customerName: "Olivia Brown",
@@ -125,21 +81,10 @@ const mockAppointments: Appointment[] = [
     startTime: "10:15AM",
     endTime: "12:00PM",
     representative: "John Carpenter",
-    status: "scheduled",
+    status: "scheduled" as "scheduled",
     color: "bg-purple-100 border-purple-300",
   },
-  {
-    id: "apt6",
-    customerName: "Ethan Davis",
-    customerPhone: "+1 (555) 345-6789",
-    customerEmail: "ethan.davis@example.com",
-    appointmentType: "Mortgage Restructuring",
-    startTime: "9:15AM",
-    endTime: "11:45AM",
-    representative: "Michael Rodriguez",
-    status: "scheduled",
-    color: "bg-blue-100 border-blue-300",
-  },
+  
 ]
 
 export function AppointmentScheduler() {
@@ -148,8 +93,94 @@ export function AppointmentScheduler() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
   const [isPostAppointmentOpen, setIsPostAppointmentOpen] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
+  const [newEventTitle, setNewEventTitle] = useState("")
+  const [newGuest, setNewGuest] = useState("")
+  const [newStartTime, setNewStartTime] = useState("")
+  const [newEndTime, setNewEndTime] = useState("")
+  const [newRepresentative, setNewRepresentative] = useState("")
+  const [newZoomLink, setNewZoomLink] = useState("")
+  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments)
 
   const formattedDate = format(currentDate, "EEEE, MMMM do yyyy")
+// State for summary editing
+const [isEditingSummary, setIsEditingSummary] = useState(false);
+const [summaryContent, setSummaryContent] = useState(
+  `Customer ${selectedAppointment?.customerName} discussed their ${selectedAppointment?.appointmentType?.toLowerCase()}. The main concerns were about interest rates and payment schedules. Customer expressed interest in a 30-year fixed rate option and requested additional information about closing costs.`
+);
+const [summaryPoints, setSummaryPoints] = useState([
+  "Current interest rate options (3.5% - 4.2%)",
+  "Monthly payment estimates ($1,450 - $1,650)",
+  "Documentation requirements for final approval"
+]);
+const [sentiment, setSentiment] = useState("Positive, but concerned about timing.");
+
+// State for action items
+const [actionItems, setActionItems] = useState([
+  { id: "task1", text: "Customer needs to upload proof of income", checked: false },
+  { id: "task2", text: "Send follow-up email with rate comparison sheet", checked: false },
+  { id: "task3", text: "Schedule follow-up call in 5 business days", checked: false },
+  { id: "task4", text: "Update customer profile with new contact preferences", checked: false },
+  { id: "task5", text: "Verify all required documentation is in the system", checked: false }
+]);
+const [isAddingAction, setIsAddingAction] = useState(false);
+const [newActionText, setNewActionText] = useState("");
+
+// Function to handle summary editing
+const handleEditSummary = () => {
+  setIsEditingSummary(true);
+};
+
+const handleSaveSummary = () => {
+  setIsEditingSummary(false);
+  // In a real app, you might want to save this to your backend
+};
+
+const handleCancelEditSummary = () => {
+  setIsEditingSummary(false);
+  // Reset to original values if needed
+};
+
+// Function to add a new action item
+const handleAddActionItem = () => {
+  if (newActionText.trim() === "") return;
+  
+  const newItem = {
+    id: `task${actionItems.length + 1}`,
+    text: newActionText,
+    checked: false
+  };
+  
+  setActionItems([...actionItems, newItem]);
+  setNewActionText("");
+  setIsAddingAction(false);
+};
+
+// Function to toggle action item checkbox
+const toggleActionItem = (id: string) => {
+  setActionItems(
+    actionItems.map(item => 
+      item.id === id ? { ...item, checked: !item.checked } : item
+    )
+  );
+};
+
+const handleAddAppointment = () => {
+  const newAppointment = {
+    id: `apt${mockAppointments.length + 1}`,
+    customerName: newGuest,
+    customerPhone: "",
+    customerEmail: "",
+    appointmentType: newEventTitle,
+    startTime: newStartTime,
+    endTime: newEndTime,
+    representative: newRepresentative,
+    status: "scheduled" as "scheduled",
+    color: "bg-purple-100 border-purple-300",
+  };
+
+  setAppointments([...appointments, newAppointment]);
+  setIsAddDialogOpen(false);
+};
 
   const handlePreviousDay = () => {
     setCurrentDate(subDays(currentDate, 1))
@@ -300,7 +331,7 @@ export function AppointmentScheduler() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 flex-1 overflow-auto">
+      <div className="w-full flex-1 overflow-auto">
         {representatives.map((rep) => (
           <div key={rep.id} className="flex flex-col border rounded-md">
             <div className="flex items-center gap-2 p-3 border-b">
@@ -360,8 +391,11 @@ export function AppointmentScheduler() {
             <DialogTitle>Add Schedule</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <Input placeholder="New Event Title" />
-
+            <Input
+              placeholder="New Event Title"
+              value={newEventTitle}
+              onChange={(e) => setNewEventTitle(e.target.value)}
+            />
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left">
@@ -375,18 +409,17 @@ export function AppointmentScheduler() {
                   selected={currentDate}
                   onSelect={(date) => {
                     if (date) {
-                      setCurrentDate(date)
-                      setIsDatePickerOpen(false)
+                      setCurrentDate(date);
+                      setIsDatePickerOpen(false);
                     }
                   }}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
-
             <div className="flex gap-2">
               <div className="flex-1">
-                <Select defaultValue="8:00AM">
+                <Select defaultValue="8:00AM" onValueChange={setNewStartTime}>
                   <SelectTrigger>
                     <Clock className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Start Time" />
@@ -402,7 +435,7 @@ export function AppointmentScheduler() {
               </div>
               <div className="flex items-center">to</div>
               <div className="flex-1">
-                <Select defaultValue="9:00AM">
+                <Select defaultValue="9:00AM" onValueChange={setNewEndTime}>
                   <SelectTrigger>
                     <Clock className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="End Time" />
@@ -417,32 +450,29 @@ export function AppointmentScheduler() {
                 </Select>
               </div>
             </div>
-
             <div>
               <Button variant="outline" className="w-full justify-start text-left">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Guest
               </Button>
             </div>
-
             <div>
               <div className="relative">
                 <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="http://zoom.channel.com"
                   className="pl-10 w-full"
+                  value={newZoomLink}
+                  onChange={(e) => setNewZoomLink(e.target.value)}
                 />
               </div>
             </div>
-
-            <Select defaultValue="john">
+            <Select defaultValue="john" onValueChange={setNewRepresentative}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Assign Representative" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="john">John Carpenter (Loans, Mortgages)</SelectItem>
-                <SelectItem value="sarah">Sarah Johnson (Credit Cards, Personal Banking)</SelectItem>
-                <SelectItem value="michael">Michael Rodriguez (Fraud Resolution, Disputes)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -450,7 +480,7 @@ export function AppointmentScheduler() {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setIsAddDialogOpen(false)}>Save</Button>
+            <Button onClick={handleAddAppointment}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -478,108 +508,172 @@ export function AppointmentScheduler() {
               </div>
 
               <Tabs defaultValue="summary">
-                <TabsList className="grid grid-cols-3 w-full">
-                  <TabsTrigger value="summary">AI Summary</TabsTrigger>
-                  <TabsTrigger value="checklist">Action Items</TabsTrigger>
-                  <TabsTrigger value="notes">Notes</TabsTrigger>
-                </TabsList>
+      <TabsList className="w-full">
+        <TabsTrigger value="summary">AI Summary</TabsTrigger>
+        <TabsTrigger value="checklist">Action Items</TabsTrigger>
+        <TabsTrigger value="notes">Notes</TabsTrigger>
+      </TabsList>
 
-                <TabsContent value="summary" className="space-y-4 pt-4">
-                  <div className="p-4 border rounded-md bg-muted/30">
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <FileText className="mr-2 h-4 w-4" />
-                      AI-Generated Summary
-                    </h4>
-                    <p className="text-sm">
-                      Customer {selectedAppointment.customerName} discussed their{" "}
-                      {selectedAppointment.appointmentType.toLowerCase()}. The main concerns were about interest rates
-                      and payment schedules. Customer expressed interest in a 30-year fixed rate option and requested
-                      additional information about closing costs.
-                    </p>
-                    <p className="text-sm mt-2">Key points discussed:</p>
-                    <ul className="text-sm list-disc pl-5 mt-1">
-                      <li>Current interest rate options (3.5% - 4.2%)</li>
-                      <li>Monthly payment estimates ($1,450 - $1,650)</li>
-                      <li>Documentation requirements for final approval</li>
-                    </ul>
-                    <p className="text-sm mt-2">Customer sentiment: Positive, but concerned about timing.</p>
-                  </div>
-
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm">
-                      Edit Summary
-                    </Button>
-                    <Button size="sm">Approve Summary</Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="checklist" className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="task1" />
-                      <label
-                        htmlFor="task1"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Customer needs to upload proof of income
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="task2" />
-                      <label
-                        htmlFor="task2"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Send follow-up email with rate comparison sheet
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="task3" />
-                      <label
-                        htmlFor="task3"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Schedule follow-up call in 5 business days
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="task4" />
-                      <label
-                        htmlFor="task4"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Update customer profile with new contact preferences
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox id="task5" />
-                      <label
-                        htmlFor="task5"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Verify all required documentation is in the system
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <Button variant="outline" size="sm" className="gap-1">
-                      <Plus className="h-4 w-4" />
-                      Add Action Item
+      <TabsContent value="summary" className="space-y-4 pt-4">
+        <div className="p-4 border rounded-md bg-muted/30">
+          <h4 className="font-medium mb-2 flex items-center">
+            <FileText className="mr-2 h-4 w-4" />
+            AI-Generated Summary
+          </h4>
+          
+          {isEditingSummary ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Main Summary</label>
+                <Textarea 
+                  value={summaryContent} 
+                  onChange={(e) => setSummaryContent(e.target.value)}
+                  className="text-sm"
+                  rows={4}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-1 block">Key Points</label>
+                {summaryPoints.map((point, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <Input 
+                      value={point}
+                      onChange={(e) => {
+                        const newPoints = [...summaryPoints];
+                        newPoints[index] = e.target.value;
+                        setSummaryPoints(newPoints);
+                      }}
+                      className="text-sm"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => {
+                        setSummaryPoints(summaryPoints.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
-                </TabsContent>
+                ))}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-1"
+                  onClick={() => setSummaryPoints([...summaryPoints, ""])}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Add Point
+                </Button>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-1 block">Customer Sentiment</label>
+                <Input 
+                  value={sentiment}
+                  onChange={(e) => setSentiment(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm">{summaryContent}</p>
+              <p className="text-sm mt-2">Key points discussed:</p>
+              <ul className="text-sm list-disc pl-5 mt-1">
+                {summaryPoints.map((point, index) => (
+                  <li key={index}>{point}</li>
+                ))}
+              </ul>
+              <p className="text-sm mt-2">Customer sentiment: {sentiment}</p>
+            </>
+          )}
+        </div>
 
-                <TabsContent value="notes" className="space-y-4 pt-4">
-                  <Textarea placeholder="Add your notes about the appointment here..." className="min-h-[150px]" />
-                  <div className="flex justify-end">
-                    <Button>Save Notes</Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
+        <div className="flex justify-end gap-2">
+          {isEditingSummary ? (
+            <>
+              <Button variant="outline" size="sm" onClick={handleCancelEditSummary}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleSaveSummary}>
+                <Save className="mr-1 h-4 w-4" /> Save Changes
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={handleEditSummary}>
+                Edit Summary
+              </Button>
+              <Button size="sm">Approve Summary</Button>
+            </>
+          )}
+        </div>
+      </TabsContent>
+
+      <TabsContent value="checklist" className="space-y-4 pt-4">
+        <div className="space-y-2">
+          {actionItems.map((item) => (
+            <div key={item.id} className="flex items-center space-x-2">
+              <Checkbox 
+                id={item.id} 
+                checked={item.checked}
+                onCheckedChange={() => toggleActionItem(item.id)}
+              />
+              <label
+                htmlFor={item.id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {item.text}
+              </label>
+            </div>
+          ))}
+          
+          {isAddingAction && (
+            <div className="mt-3 space-y-2">
+              <Input
+                placeholder="Enter new action item"
+                value={newActionText}
+                onChange={(e) => setNewActionText(e.target.value)}
+                className="text-sm"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleAddActionItem}>
+                  Add
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setIsAddingAction(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!isAddingAction && (
+          <div className="pt-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1"
+              onClick={() => setIsAddingAction(true)}
+            >
+              <Plus className="h-4 w-4" />
+              Add Action Item
+            </Button>
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="notes" className="space-y-4 pt-4">
+        <Textarea placeholder="Add your notes about the appointment here..." className="min-h-[150px]" />
+        <div className="flex justify-end">
+          <Button>Save Notes</Button>
+        </div>
+      </TabsContent>
+    </Tabs>
 
               <div className="flex justify-between pt-2">
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button variant="outline" size="sm">
                     <AlertCircle className="mr-2 h-4 w-4" />
                     Report Issue
@@ -588,13 +682,9 @@ export function AppointmentScheduler() {
                     <Calendar className="mr-2 h-4 w-4" />
                     Reschedule
                   </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setIsPostAppointmentOpen(false)}>
-                    Close
-                  </Button>
                   <Button onClick={() => setIsPostAppointmentOpen(false)}>Complete & Send Summary</Button>
                 </div>
+               
               </div>
             </div>
           )}
