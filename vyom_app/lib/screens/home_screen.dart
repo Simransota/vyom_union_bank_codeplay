@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:translator/translator.dart';
+import 'package:vyom/screens/chat_agent/chat_agent_screen.dart';
 import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
 import 'package:vyom/screens/offers_page/offers_page.dart';
 import 'package:vyom/screens/query_page/query_history_screen.dart';
@@ -178,10 +179,13 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+              leading: Icon(Icons.chat_bubble),
+              title: Text('Chat'),
               onTap: () {
-                Navigator.pop(context);
+               Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatAgentScreen()),
+                );
               },
             ),
             ListTile(
@@ -194,6 +198,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => ChatScreen()));
+        },
+        backgroundColor: Color(0xFF233B99),
+        child: const Icon(Icons.chat_bubble_outline),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -314,70 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          // FutureBuilder<String>(
-                          //   future: _translateText('Loan Eligibility'),
-                          //   builder: (context, snapshot) {
-                          //     if (snapshot.connectionState == ConnectionState.done) {
-                          //       return Text(
-                          //         snapshot.data ?? 'Loan Eligibility',
-                          //         style: TextStyle(
-                          //           fontSize: 22,
-                          //           fontWeight: FontWeight.bold,
-                          //           color: theme.colorScheme.onBackground,
-                          //         ),
-                          //       );
-                          //     } else {
-                          //       return const CircularProgressIndicator();
-                          //     }
-                          //   },
-                          // ),
-                          // const SizedBox(height: 16),
-                          // Container(
-                          //   height: 200,
-                          //   decoration: BoxDecoration(
-                          //     color: theme.colorScheme.secondary.withOpacity(0.3),
-                          //     borderRadius: BorderRadius.circular(12),
-                          //   ),
-                          //   child: Center(
-                          //     child: Row(
-                          //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //       children: [
-                          //         _buildBarChart('XYZ Bank', 0.8, theme.colorScheme.primary),
-                          //         _buildBarChart('ABC Bank', 0.9, theme.colorScheme.primary),
-                          //         _buildBarChart('PQR Bank', 0.85, theme.colorScheme.primary),
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
-                          // const SizedBox(height: 24),
-                          // FutureBuilder<String>(
-                          //   future: _translateText('Spending Insights'),
-                          //   builder: (context, snapshot) {
-                          //     if (snapshot.connectionState == ConnectionState.done) {
-                          //       return Text(
-                          //         snapshot.data ?? 'Spending Insights',
-                          //         style: TextStyle(
-                          //           fontSize: 22,
-                          //           fontWeight: FontWeight.bold,
-                          //           color: theme.colorScheme.onBackground,
-                          //         ),
-                          //       );
-                          //     } else {
-                          //       return const CircularProgressIndicator();
-                          //     }
-                          //   },
-                          // ),
-                          // const SizedBox(height: 16),
-                          // Container(
-                          //   height: 200,
-                          //   decoration: BoxDecoration(
-                          //     color: theme.colorScheme.secondary.withOpacity(0.3),
-                          //     borderRadius: BorderRadius.circular(12),
-                          //   ),
-                          //   padding: const EdgeInsets.all(16),
-                          //   child: _buildLineChart(theme),
-                          // ),
-                        ],
+                         ],
                       ),
                     );
                   } else {
@@ -922,6 +872,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               const SizedBox(height: 24),
+              
             ],
           ),
         ),

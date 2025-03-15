@@ -37,6 +37,9 @@
     <key>NSLocalNetworkUsageDescription</key>
     <string>This app requires local network access to communicate with nearby devices.</string>
 
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>{YourAppName} needs access to bluetooth to connect to nearby devices.</string>
+
     <!-- App Transport Security -->
     <key>NSAppTransportSecurity</key>
     <dict>
