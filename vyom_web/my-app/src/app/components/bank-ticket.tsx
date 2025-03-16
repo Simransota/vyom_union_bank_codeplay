@@ -99,13 +99,13 @@ export default function BankTicket({
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 relative mr-2">
-                <Image
+                {/* <Image
                   src="/placeholder.svg?height=40&width=40"
                   alt="Union Bank Logo"
                   width={40}
                   height={40}
                   className="rounded-full"
-                />
+                /> */}
               </div>
               <h2 className="text-lg font-semibold">Union Bank</h2>
             </div>

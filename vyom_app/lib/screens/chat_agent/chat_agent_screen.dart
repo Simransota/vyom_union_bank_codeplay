@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 
 class ChatBubble extends StatelessWidget {
   final String message;
@@ -6,6 +9,7 @@ class ChatBubble extends StatelessWidget {
   final DateTime timestamp;
   final bool hasAttachment;
   final VoidCallback? onAttachmentTap;
+  final String? attachmentName;
 
   const ChatBubble({
     Key? key,
@@ -14,6 +18,7 @@ class ChatBubble extends StatelessWidget {
     required this.timestamp,
     this.hasAttachment = false,
     this.onAttachmentTap,
+    this.attachmentName,
   }) : super(key: key);
 
   @override
@@ -74,17 +79,18 @@ class ChatBubble extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.attachment,
+                          _getFileIcon(attachmentName ?? ''),
                           color: textColor.withOpacity(0.7),
                           size: 16,
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'View Attachment',
+                          attachmentName ?? 'View Attachment',
                           style: TextStyle(
                             color: textColor.withOpacity(0.7),
                             fontSize: 12,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -116,6 +122,30 @@ class ChatBubble extends StatelessWidget {
     final minute = timestamp.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
   }
+
+  // Helper method to determine file icon based on file extension
+  IconData _getFileIcon(String fileName) {
+    final extension = path.extension(fileName).toLowerCase();
+    
+    switch (extension) {
+      case '.pdf':
+        return Icons.picture_as_pdf;
+      case '.doc':
+      case '.docx':
+        return Icons.description;
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+        return Icons.image;
+      case '.mp4':
+      case '.mov':
+      case '.avi':
+        return Icons.video_file;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
 }
 
 // Normal chat screen for two users (no AI involved)
@@ -130,6 +160,8 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
   final TextEditingController _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
+  File? _selectedFile;
+  String? _selectedFileName;
 
   @override
   void dispose() {
@@ -138,7 +170,7 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
   }
 
   void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+    if (_messageController.text.trim().isEmpty && _selectedFile == null) return;
 
     final userMessage = _messageController.text;
     _messageController.clear();
@@ -149,7 +181,12 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
         message: userMessage,
         isUser: true,
         timestamp: DateTime.now(),
+        hasAttachment: _selectedFile != null,
+        attachmentFile: _selectedFile,
+        attachmentName: _selectedFileName,
       ));
+      _selectedFile = null;
+      _selectedFileName = null;
       _isTyping = true; // Show the "other" user is typing
     });
 
@@ -169,12 +206,113 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
 
   // Dummy logic to generate a response from the other person (for the sake of this example)
   String _getResponse(String userMessage) {
-    if (userMessage.toLowerCase().contains('hello')) {
+    if (userMessage.isEmpty && _messages.last.hasAttachment) {
+      return 'Thanks for sharing the document! I\'ll take a look at it.';
+    } else if (userMessage.toLowerCase().contains('hello')) {
       return 'Hi there! How are you doing today?';
     } else if (userMessage.toLowerCase().contains('how are you')) {
-      return 'I’m doing great, thanks for asking! What’s up?';
+      return 'I\'m doing great, thanks for asking! What\'s up?';
     } else {
-      return 'I didn’t quite catch that, can you say it again?';
+      return 'I didn\'t quite catch that, can you say it again?';
+    }
+  }
+
+  // Method to open file picker
+  Future<void> _pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'txt'],
+      );
+
+      if (result != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          _selectedFileName = result.files.single.name;
+        });
+        
+        // Show selected file indicator
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('File selected: $_selectedFileName'),
+            duration: const Duration(seconds: 2),
+            action: SnackBarAction(
+              label: 'Cancel',
+              onPressed: () {
+                setState(() {
+                  _selectedFile = null;
+                  _selectedFileName = null;
+                });
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting file: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Method to view document
+  void _viewDocument(File file, String? fileName) {
+    // In a real app, you would open the file with the appropriate viewer
+    // or display it in your app using packages like pdf_viewer, image viewers, etc.
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Document: ${fileName ?? 'Attachment'}'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getFileIconForDialog(fileName ?? ''),
+                size: 48,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text('File path: ${file.path}'),
+              const SizedBox(height: 8),
+              Text('This is where you would integrate a file viewer'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getFileIconForDialog(String fileName) {
+    final extension = path.extension(fileName).toLowerCase();
+    
+    switch (extension) {
+      case '.pdf':
+        return Icons.picture_as_pdf;
+      case '.doc':
+      case '.docx':
+        return Icons.description;
+      case '.jpg':
+      case '.jpeg':
+      case '.png':
+      case '.gif':
+        return Icons.image;
+      case '.mp4':
+      case '.mov':
+      case '.avi':
+        return Icons.video_file;
+      default:
+        return Icons.insert_drive_file;
     }
   }
 
@@ -184,10 +322,10 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat'),
+        title: const Text('Chat'),
         actions: [
           IconButton(
-            icon: Icon(Icons.info_outline),
+            icon: const Icon(Icons.info_outline),
             onPressed: () {
               // Info button or dialog for chat
             },
@@ -209,11 +347,50 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
                   isUser: message.isUser,
                   timestamp: message.timestamp,
                   hasAttachment: message.hasAttachment,
-                  onAttachmentTap: message.hasAttachment ? () {} : null,
+                  attachmentName: message.attachmentName,
+                  onAttachmentTap: message.hasAttachment && message.attachmentFile != null 
+                      ? () => _viewDocument(message.attachmentFile!, message.attachmentName) 
+                      : null,
                 );
               },
             ),
           ),
+          
+          // Selected file indicator
+          if (_selectedFile != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: theme.colorScheme.surface,
+              child: Row(
+                children: [
+                  Icon(
+                    _getFileIconForDialog(_selectedFileName ?? ''),
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _selectedFileName ?? 'File selected',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: () {
+                      setState(() {
+                        _selectedFile = null;
+                        _selectedFileName = null;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
           
           // "Other person is typing" indicator
           if (_isTyping)
@@ -259,19 +436,19 @@ class _ChatAgentScreenState extends State<ChatAgentScreen> {
             ),
             child: Row(
               children: [
-                // Attachment button (optional)
+                // Attachment button
                 IconButton(
                   icon: Icon(Icons.attach_file, color: theme.colorScheme.primary),
-                  onPressed: () {
-                    // Handle attachment
-                  },
+                  onPressed: _pickFile,
                 ),
                 
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Type your message...',
+                      hintText: _selectedFile != null 
+                          ? 'Add a message or send the file...' 
+                          : 'Type your message...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
@@ -305,11 +482,15 @@ class ChatMessage {
   final bool isUser;
   final DateTime timestamp;
   final bool hasAttachment;
+  final File? attachmentFile;
+  final String? attachmentName;
 
   ChatMessage({
     required this.message,
     required this.isUser,
     required this.timestamp,
     this.hasAttachment = false,
+    this.attachmentFile,
+    this.attachmentName,
   });
 }

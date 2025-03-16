@@ -4,6 +4,7 @@ import 'package:scratcher/scratcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/services.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 
 class OffersPage extends StatefulWidget {
   const OffersPage({Key? key}) : super(key: key);
@@ -427,14 +428,27 @@ class _OffersPageState extends State<OffersPage> {
     theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCategories(),
-            _buildOffersList(),
-          ],
+      body: Stack(
+        children:[ SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCategories(),
+              _buildOffersList(),
+            ],
+          ),
         ),
+         VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
+        ],
       ),
     );
   }

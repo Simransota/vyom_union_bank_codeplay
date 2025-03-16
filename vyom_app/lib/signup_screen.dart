@@ -1,275 +1,139 @@
-// otp_verification_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
+import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
-  final String? phoneNumber;
-  
-  const SignupScreen({
-    Key? key,
-    this.phoneNumber,
-  }) : super(key: key);
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
-  State<SignupScreen> createState() => _OtpVerificationScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _OtpVerificationScreenState extends State<SignupScreen> {
-  final List<TextEditingController> _otpControllers = List.generate(
-    4,
-    (index) => TextEditingController(),
-  );
-  final List<FocusNode> _focusNodes = List.generate(
-    4,
-    (index) => FocusNode(),
-  );
-  bool _isOtpSent = false;
-  final TextEditingController _phoneController = TextEditingController();
-  bool _isLoading = false;
+class _SignupScreenState extends State<SignupScreen> {
+  final nameController = TextEditingController();
+  final accountNumberController = TextEditingController();
+  
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final panCardController = TextEditingController();
+  final aadhaarCardController = TextEditingController();
+  final addressController = TextEditingController();
+  DateTime? selectedDate;
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _phoneController.text = widget.phoneNumber ?? '';
-  }
+  final supabase = Supabase.instance.client;
 
   @override
   void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    _phoneController.dispose();
+    nameController.dispose();
+    accountNumberController.dispose();
+   
+    emailController.dispose();
+    passwordController.dispose();
+    panCardController.dispose();
+    aadhaarCardController.dispose();
+    addressController.dispose();
     super.dispose();
   }
 
-  void _sendOtp() async {
-    if (_phoneController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid mobile number')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate OTP sending
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-      _isOtpSent = true;
-    });
-  }
-
-  void _verifyOtp() async {
-    final otp = _otpControllers.map((e) => e.text).join();
-    
-    if (otp.length != 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid OTP')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate OTP verification
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    // Navigate to registration details page
-    if (mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RegistrationDetailsScreen(),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Image.asset(
-              'assets/otp_illustration.png',
-              height: 200,
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'OTP Verification',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            if (!_isOtpSent) ...[
-              Text(
-                'We will send you an One Time Password on this mobile number',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Text(
-                      '+91',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Enter Mobile Number',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _sendOtp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF233B99),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                      'GET OTP',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-              ),
-            ] else ...[
-              Text(
-                'Enter the OTP sent to +91-${_phoneController.text}',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  4,
-                  (index) => SizedBox(
-                    width: 60,
-                    child: TextField(
-                      controller: _otpControllers[index],
-                      focusNode: _focusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      decoration: InputDecoration(
-                        counterText: '',
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF233B99)),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (value.isNotEmpty && index < 3) {
-                          _focusNodes[index + 1].requestFocus();
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Don\'t receive the OTP? ',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  TextButton(
-                    onPressed: _isLoading ? null : _sendOtp,
-                    child: const Text(
-                      'RESEND OTP',
-                      style: TextStyle(
-                        color: Color(0xFF233B99),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _verifyOtp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF233B99),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'VERIFY & PROCEED',
-                        style: TextStyle(fontSize: 16 , color: Colors.white),
-                      ),
-              ),
-            ],
-          ],
-        ),
-      ),
+  // Function to select date
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
-}
 
-class RegistrationDetailsScreen extends StatelessWidget {
-  const RegistrationDetailsScreen({Key? key}) : super(key: key);
+  // Format date for display
+  String get formattedDate {
+    return selectedDate == null
+        ? "Select Date of Birth"
+        : DateFormat('dd-MM-yyyy').format(selectedDate!);
+  }
+
+  /// Function for signup using Supabase
+  Future<void> _signup() async {
+    final name = nameController.text.trim();
+    final accountNumber = accountNumberController.text.trim();
+   
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final panCard = panCardController.text.trim();
+    final aadhaarCard = aadhaarCardController.text.trim();
+    final address = addressController.text.trim();
+
+    // Validate form inputs
+    if (name.isEmpty || accountNumber.isEmpty || 
+        email.isEmpty || password.isEmpty || panCard.isEmpty ||
+        aadhaarCard.isEmpty || address.isEmpty || selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          "Please fill all the details",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final userCreate = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': name,
+          'account_number': accountNumber,
+         
+          'pan_card': panCard,
+          'aadhaar_card': aadhaarCard,
+          'date_of_birth': selectedDate?.toIso8601String(),
+          'address': address,
+        },
+      );
+      
+      if (mounted) {
+        if (userCreate.user != null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+              "Check your email to confirm your registration!",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green,
+          ));
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Registration failed: $e"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -293,53 +157,109 @@ class RegistrationDetailsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextFormField(
+              controller: nameController,
               decoration: InputDecoration(
-              labelText: 'Full Name',
-              prefixIcon: const Icon(Icons.person),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                labelText: 'Full Name',
+                prefixIcon: const Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
+              controller: accountNumberController,
               decoration: InputDecoration(
-              labelText: 'Account Number',
-              prefixIcon: const Icon(Icons.account_balance),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                labelText: 'Account Number',
+                prefixIcon: const Icon(Icons.account_balance),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+            ),
+            const SizedBox(height: 16),
+           
+            // PAN Card field
+            TextFormField(
+              controller: panCardController,
+              decoration: InputDecoration(
+                labelText: 'PAN Card Number',
+                prefixIcon: const Icon(Icons.credit_card),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              textCapitalization: TextCapitalization.characters,
+            ),
+            const SizedBox(height: 16),
+            // Aadhaar Card field
+            TextFormField(
+              controller: aadhaarCardController,
+              decoration: InputDecoration(
+                labelText: 'Aadhaar Card Number',
+                prefixIcon: const Icon(Icons.credit_card),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            // Date of Birth field
+            InkWell(
+              onTap: () => _selectDate(context),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Date of Birth',
+                  prefixIcon: const Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  formattedDate,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: selectedDate == null ? Colors.grey : Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Address field
+            TextFormField(
+              controller: addressController,
+              decoration: InputDecoration(
+                labelText: 'Address',
+                prefixIcon: const Icon(Icons.home),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                prefixIcon: const Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              decoration: InputDecoration(
-              labelText: 'Customer ID (CIF Number)',
-              prefixIcon: const Icon(Icons.credit_card),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              decoration: InputDecoration(
-              labelText: 'Email',
-              prefixIcon: const Icon(Icons.email),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-              labelText: 'Create Password',
-              prefixIcon: const Icon(Icons.lock),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                labelText: 'Create Password',
+                prefixIcon: const Icon(Icons.lock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
             const SizedBox(height: 32),
@@ -351,12 +271,25 @@ class RegistrationDetailsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onPressed: isLoading ? null : _signup,
+              child: isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                : const Text(
+                  'REGISTER',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
               onPressed: () {
-                // Implement registration logic
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
               },
               child: const Text(
-                'REGISTER',
-                style: TextStyle(fontSize: 16 , color: Colors.white),
+                "Already have an account? Login",
+                style: TextStyle(fontSize: 14, color: Color(0xFF233B99)),
               ),
             ),
           ],

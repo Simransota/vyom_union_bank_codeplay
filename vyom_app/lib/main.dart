@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:translator/translator.dart'; // Import translator package
@@ -13,24 +14,30 @@ import 'package:vyom/screens/query_page/feedback_screen.dart';
 import 'package:vyom/screens/query_page/query_screen.dart';
 import 'package:vyom/screens/query_page/query_tracking_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:vyom/screens/voice_asstance/voice_assistant_demo_screen.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
+import 'package:vyom/signup_screen.dart';
 import '../screens/home_screen.dart';
 
-// import 'screens/query_page/query_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
+void main() async {
+  /// TODO: update Supabase credentials with your own
+  await Supabase.initialize(
+    url: 'https://jcwhtqipkdxuuoakxqqi.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd2h0cWlwa2R4dXVvYWt4cXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDU0MjMsImV4cCI6MjA1NzYyMTQyM30.16jYRAnjmEHs4P_USk7TBKns0osB4vw-PmN3L5CfEVk',
+  );
+  runApp(const MyApp());
 }
 
+final supabase = Supabase.instance.client;
+
 class MyApp extends StatelessWidget {
-  // static String title;
-
-  // static String title;
-
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final translator = GoogleTranslator(); // ✅ Create translator instance
+    final translator = GoogleTranslator();
 
     return MaterialApp(
       title: 'Chatbot UI',
@@ -54,11 +61,12 @@ class MyApp extends StatelessWidget {
           displayColor: Colors.black,
         ),
       ),
-        home: HomeScreen(translator: translator), 
-        // home: CreditInsightsScreen(), 
+      // home: HomeScreen(translator: translator),
+      home: SignupScreen(),
     );
   }
 }
+
 
 
 // import 'dart:io';
@@ -391,3 +399,36 @@ class MyApp extends StatelessWidget {
 //     // TODO: implement onPeerListUpdate
 //   }
 // }
+
+// import 'package:flutter/material.dart';
+// import 'package:vyom/login_screen.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
+
+// void main() async {
+//   /// TODO: update Supabase credentials with your own
+//   await Supabase.initialize(
+//     url: 'https://jcwhtqipkdxuuoakxqqi.supabase.co',
+//     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd2h0cWlwa2R4dXVvYWt4cXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDU0MjMsImV4cCI6MjA1NzYyMTQyM30.16jYRAnjmEHs4P_USk7TBKns0osB4vw-PmN3L5CfEVk',
+//   );
+//   runApp(const MyApp());
+// }
+
+// final supabase = Supabase.instance.client;
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'Flutter Auth',
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+//         useMaterial3: true,
+//       ),
+//       home: const LoginScreen(),
+//     );
+//   }
+// }
+

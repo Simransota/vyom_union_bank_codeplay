@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:translator/translator.dart';
+import 'package:vyom/onboardingscreen.dart';
 import './screens/home_screen.dart';
 import 'signup_screen.dart';
 
@@ -15,10 +17,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final translator = GoogleTranslator(); 
   final LocalAuthentication auth = LocalAuthentication();
+  final supabase = Supabase.instance.client;
+  bool isLoading = false;
   bool _isBiometricsAvailable = false;
   List<BiometricType> _availableBiometrics = [];
   String _authStatus = '';
-  String _biometricSupportStatus = '';  // New variable to store biometric support status
+  String _biometricSupportStatus = ''; 
 
   final _customerIdController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -125,6 +129,40 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _login() async {
+    final password = _passwordController.text.trim();
+    final email = _emailController.text.trim();
+
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await supabase.auth.signInWithPassword(password: password, email: email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+            "Successfully login",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 21, color: Colors.white),
+          ),
+          backgroundColor: Colors.greenAccent,
+        ));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => HomeScreen(translator: translator)));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Login Failed")));
+      }
+    }
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -144,73 +182,41 @@ class _LoginScreenState extends State<LoginScreen> {
                   'assets/union_bank_logo.png',
                   height: 80,
                 ),
-                // const SizedBox(height: 48),
-                // TextFormField(
-                //   controller: _customerIdController,
-                //   decoration: InputDecoration(
-                //     labelText: 'Customer ID',
-                //     prefixIcon: const Icon(Icons.person),
-                //     border: OutlineInputBorder(
-                //       borderRadius: BorderRadius.circular(12),
-                //     ),
-                //   ),
-                // ),
+                
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: const Icon(Icons.phone),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
+                TextField(
                   controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email ID',
-                    prefixIcon: const Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                      labelText: "Email", border: OutlineInputBorder()),
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: 10),
+                TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  decoration: const InputDecoration(
+                      labelText: "Password", border: OutlineInputBorder()),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 ElevatedButton(
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF233B99),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) =>  HomeScreen(translator: translator)),
-                    );
-                  },
+                      backgroundColor: theme.colorScheme.primary,
+                      
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6)),
+                      side: const BorderSide(width: 2, color: Colors.blue)),
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : const Text(
+                          "Login",
+                          style:
+                              TextStyle(fontSize: 23, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
                 ),
+                
+                // Removed duplicate login button
+                
                 if (_isBiometricsAvailable) ...[
                   const SizedBox(height: 16),
                   const Row(
@@ -246,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SignupScreen()),
+                      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
                     );
                   },
                 ),

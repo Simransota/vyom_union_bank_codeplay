@@ -1,4 +1,4 @@
-import { AppointmentScheduler } from "../components/appointment-scheduler"
+import  AppointmentScheduler  from "../components/appointment-scheduler"
 
 export default function AppointmentsPage() {
   return (

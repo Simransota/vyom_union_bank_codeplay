@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import '../../widgets/financial_card.dart';
 
 class AppointmentBookingScreen extends StatefulWidget {
@@ -49,192 +50,206 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Service Selection
-            FinancialCard(
-              title: 'Select Service',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _services.map((service) {
-                      final isSelected = _selectedService == service;
-                      return ChoiceChip(
-                        label: Text(service),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _selectedService = service);
-                          }
-                        },
-                        selectedColor: theme.colorScheme.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onBackground,
+      body: Stack(
+        children:[
+           SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Service Selection
+              FinancialCard(
+                title: 'Select Service',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _services.map((service) {
+                        final isSelected = _selectedService == service;
+                        return ChoiceChip(
+                          label: Text(service),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() => _selectedService = service);
+                            }
+                          },
+                          selectedColor: theme.colorScheme.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? theme.colorScheme.onPrimary
+                                : theme.colorScheme.onBackground,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+        
+              // Branch Selection
+              FinancialCard(
+                title: 'Select Branch',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: _selectedBranch,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Branch Selection
-            FinancialCard(
-              title: 'Select Branch',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DropdownButtonFormField<String>(
-                    value: _selectedBranch,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    items: _branches.map((branch) {
-                      return DropdownMenuItem(
-                        value: branch,
-                        child: Text(branch),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedBranch = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Meeting Type
-            FinancialCard(
-              title: 'Meeting Type',
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildMeetingTypeOption(
-                      theme,
-                      icon: Icons.people_outline,
-                      title: 'In-Person',
-                      isSelected: !_isVirtual,
-                      onTap: () => setState(() => _isVirtual = false),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildMeetingTypeOption(
-                      theme,
-                      icon: Icons.video_camera_front_outlined,
-                      title: 'Virtual',
-                      isSelected: _isVirtual,
-                      onTap: () => setState(() => _isVirtual = true),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Date & Time Selection
-            FinancialCard(
-              title: 'Select Date & Time',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Calendar
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.colorScheme.outline),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: CalendarDatePicker(
-                      initialDate: _selectedDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 30)),
-                      onDateChanged: (date) {
-                        setState(() => _selectedDate = date);
+                      items: _branches.map((branch) {
+                        return DropdownMenuItem(
+                          value: branch,
+                          child: Text(branch),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedBranch = value);
+                        }
                       },
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Available Time Slots',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onBackground,
+                    const SizedBox(height: 16),
+                    
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+        
+              // Meeting Type
+              FinancialCard(
+                title: 'Meeting Type',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildMeetingTypeOption(
+                        theme,
+                        icon: Icons.people_outline,
+                        title: 'In-Person',
+                        isSelected: !_isVirtual,
+                        onTap: () => setState(() => _isVirtual = false),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildMeetingTypeOption(
+                        theme,
+                        icon: Icons.video_camera_front_outlined,
+                        title: 'Virtual',
+                        isSelected: _isVirtual,
+                        onTap: () => setState(() => _isVirtual = true),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+        
+              // Date & Time Selection
+              FinancialCard(
+                title: 'Select Date & Time',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Calendar
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.colorScheme.outline),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: CalendarDatePicker(
+                        initialDate: _selectedDate,
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 30)),
+                        onDateChanged: (date) {
+                          setState(() => _selectedDate = date);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Available Time Slots',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _timeSlots.map((time) {
+                        final isSelected = _selectedTime == time;
+                        return ChoiceChip(
+                          label: Text(time),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setState(() => _selectedTime = time);
+                            }
+                          },
+                          selectedColor: theme.colorScheme.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? theme.colorScheme.onPrimary
+                                : theme.colorScheme.onBackground,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+        
+              // Book Appointment Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Handle appointment booking
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _timeSlots.map((time) {
-                      final isSelected = _selectedTime == time;
-                      return ChoiceChip(
-                        label: Text(time),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _selectedTime = time);
-                          }
-                        },
-                        selectedColor: theme.colorScheme.primary,
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? theme.colorScheme.onPrimary
-                              : theme.colorScheme.onBackground,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Book Appointment Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle appointment booking
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.secondary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Book Appointment',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  child: const Text(
+                    'Book Appointment',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+         VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
+        ],
       ),
     );
   }

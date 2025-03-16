@@ -8,6 +8,7 @@ import 'package:vyom/screens/query_page/query_history_screen.dart';
 import 'package:vyom/screens/query_page/query_screen.dart';
 import 'package:vyom/screens/query_page/query_tracking_screen.dart';
 import 'package:vyom/screens/video_call/join_page.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import 'package:vyom/widgets/chat_bot.dart';
 
 import '../widgets/financial_card.dart';
@@ -198,122 +199,418 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => ChatScreen()));
-        },
-        backgroundColor: Color(0xFF233B99),
-        child: const Icon(Icons.chat_bubble_outline),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Section
-              FutureBuilder<String>(
-                future: _translateText('Welcome, Simran'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return Text(
-                      snapshot.data ?? 'Welcome, Simran',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onBackground,
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
+     
 
-              // Financial Summary Card
-              FutureBuilder<String>(
-                future: _translateText('Financial Summary'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return FinancialCard(
-                      title: snapshot.data ?? 'Financial Summary',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FutureBuilder<String>(
-                            future: _translateText('Credit Health'),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Text(
-                                  snapshot.data ?? 'Credit Health',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onBackground,
+      body: Stack(
+        children: [
+          SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Welcome Section
+                FutureBuilder<String>(
+                  future: _translateText('Welcome, Simran'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return Text(
+                        snapshot.data ?? 'Welcome, Simran',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+        
+                // Financial Summary Card
+                FutureBuilder<String>(
+                  future: _translateText('Financial Summary'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return FinancialCard(
+                        title: snapshot.data ?? 'Financial Summary',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<String>(
+                              future: _translateText('Credit Health'),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Text(
+                                    snapshot.data ?? 'Credit Health',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onBackground,
+                                    ),
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color:
+                                    theme.colorScheme.secondary.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    '750',
+                                    style: TextStyle(
+                                      fontSize: 64,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      FutureBuilder<String>(
+                                        future: _translateText('CIBIL Score'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ?? 'CIBIL Score',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: theme
+                                                    .colorScheme.onBackground
+                                                    .withOpacity(0.7),
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                      FutureBuilder<String>(
+                                        future: _translateText('Excellent'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ?? 'Excellent',
+                                              style: TextStyle(
+                                                fontSize: 22,
+                                                color: theme
+                                                    .colorScheme.onBackground
+                                                    .withOpacity(0.7),
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                           ],
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+        
+                // Proactive Banking Alert
+                FutureBuilder<String>(
+                  future: _translateText('Proactive Banking Alert'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              snapshot.data ?? 'Proactive Banking Alert',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onBackground,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            FutureBuilder<String>(
+                              future: _translateText(
+                                  'Your CIBIL score is 750. You\'re eligible for a personal loan at 9.5% interest from XYZ Bank.'),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Text(
+                                    snapshot.data ??
+                                        'Your CIBIL score is 750. You\'re eligible for a personal loan at 9.5% interest from XYZ Bank.',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: theme.colorScheme.onBackground
+                                          .withOpacity(0.7),
+                                    ),
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+        
+                // Financial Health Recommendations
+                FutureBuilder<String>(
+                  future: _translateText('Financial Health Recommendations'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return FinancialCard(
+                        title:
+                            snapshot.data ?? 'Financial Health Recommendations',
+                        child: Column(
+                          children: [
+                            RecommendationItem(
+                              icon: Icons.credit_card,
+                              title: 'Reduce credit card debt',
+                              description:
+                                  'Pay off 20% of your credit card balance within the next 30 days to improve your credit score.',
+                              progress: 0.2,
+                              progressColor: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 16),
+                            RecommendationItem(
+                              icon: Icons.savings,
+                              title: 'Increase savings',
+                              description:
+                                  'Consider automating monthly savings of ₹5,000 to build your emergency fund.',
+                              progress: 0.5,
+                              progressColor: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 16),
+                            RecommendationItem(
+                              icon: Icons.trending_up,
+                              title: 'Improve credit mix',
+                              description:
+                                  'Diversifying your credit sources can help improve your score over time.',
+                              progress: 0.15,
+                              progressColor: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 24),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color:
+                                    theme.colorScheme.secondary.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  FutureBuilder<String>(
+                                    future: _translateText(
+                                        'Personalized Financial Goal'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.done) {
+                                        return Text(
+                                          snapshot.data ??
+                                              'Personalized Financial Goal',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.onBackground,
+                                          ),
+                                        );
+                                      } else {
+                                        return const CircularProgressIndicator();
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  FutureBuilder<String>(
+                                    future: _translateText(
+                                        'Save ₹10,000 by the end of this quarter'),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.done) {
+                                        return Text(
+                                          snapshot.data ??
+                                              'Save ₹10,000 by the end of this quarter',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: theme.colorScheme.onBackground
+                                                .withOpacity(0.7),
+                                          ),
+                                        );
+                                      } else {
+                                        return const CircularProgressIndicator();
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+        
+                // Query & Complaint Tracking
+                FutureBuilder<String>(
+                  future: _translateText('Query & Complaint Tracking'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return FinancialCard(
+                        title: snapshot.data ?? 'Query & Complaint Tracking',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<String>(
+                              future: _translateText('Active Queries'),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Text(
+                                    snapshot.data ?? 'Active Queries',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onBackground,
+                                    ),
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            QueryItem(
+                              icon: Icons.error_outline,
+                              iconColor: Colors.red,
+                              title: 'Unauthorized Transaction',
+                              status: 'Under Review - Est. 2 days',
+                              onTap: () {},
+                            ),
+                            const SizedBox(height: 12),
+                            QueryItem(
+                              icon: Icons.access_time,
+                              iconColor: theme.colorScheme.primary,
+                              title: 'Loan Application',
+                              status: 'Processing - Est. 3 days',
+                              onTap: () {},
+                            ),
+                            const SizedBox(height: 24),
+                            FutureBuilder<String>(
+                              future: _translateText('Resolved Queries'),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Text(
+                                    snapshot.data ?? 'Resolved Queries',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onBackground,
+                                    ),
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            QueryItem(
+                              icon: Icons.check_circle_outline,
+                              iconColor: Colors.green,
+                              title: 'Account Statement Request',
+                              status: 'Resolved on 2023-05-15',
+                              onTap: () {},
+                              showButton: false,
+                            ),
+                            const SizedBox(height: 12),
+                            QueryItem(
+                              icon: Icons.check_circle_outline,
+                              iconColor: Colors.green,
+                              title: 'Credit Limit Increase',
+                              status: 'Resolved on 2023-05-10',
+                              onTap: () {},
+                              showButton: false,
+                            ),
+                            const SizedBox(height: 16),
+                            // In your HomeScreen file, update the "Chat with AI Assistant" button:
+        
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      translator: widget.translator,
+                                      currentLanguage: _currentLanguage,
+                                    ),
                                   ),
                                 );
-                              } else {
-                                return const CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color:
-                                  theme.colorScheme.secondary.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  '750',
-                                  style: TextStyle(
-                                    fontSize: 64,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.primary,
-                                  ),
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                const SizedBox(width: 16),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    Icon(Icons.chat_bubble_outline,
+                                        color: theme.colorScheme.onPrimary),
+                                    const SizedBox(width: 8),
                                     FutureBuilder<String>(
-                                      future: _translateText('CIBIL Score'),
+                                      future: _translateText(
+                                          'Chat with AI Assistant'),
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
                                             ConnectionState.done) {
                                           return Text(
-                                            snapshot.data ?? 'CIBIL Score',
+                                            snapshot.data ??
+                                                'Chat with AI Assistant',
                                             style: TextStyle(
-                                              fontSize: 18,
-                                              color: theme
-                                                  .colorScheme.onBackground
-                                                  .withOpacity(0.7),
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator();
-                                        }
-                                      },
-                                    ),
-                                    FutureBuilder<String>(
-                                      future: _translateText('Excellent'),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return Text(
-                                            snapshot.data ?? 'Excellent',
-                                            style: TextStyle(
-                                              fontSize: 22,
-                                              color: theme
-                                                  .colorScheme.onBackground
-                                                  .withOpacity(0.7),
+                                              color: theme.colorScheme.onPrimary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
                                             ),
                                           );
                                         } else {
@@ -323,130 +620,209 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+        
+                // AI-Powered Insights & Alerts
+                FutureBuilder<String>(
+                  future: _translateText('AI-Powered Insights & Alerts'),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return FinancialCard(
+                        title: snapshot.data ?? 'AI-Powered Insights & Alerts',
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE0F2E9),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.shield_outlined,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      FutureBuilder<String>(
+                                        future: _translateText(
+                                            'Fraud Detection Alerts'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ??
+                                                  'Fraud Detection Alerts',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: theme
+                                                    .colorScheme.onBackground,
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(height: 4),
+                                      FutureBuilder<String>(
+                                        future: _translateText(
+                                            'No suspicious activity detected in the last 30 days.'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ??
+                                                  'No suspicious activity detected in the last 30 days.',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: theme
+                                                    .colorScheme.onBackground
+                                                    .withOpacity(0.7),
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                         ],
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Proactive Banking Alert
-              FutureBuilder<String>(
-                future: _translateText('Proactive Banking Alert'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            snapshot.data ?? 'Proactive Banking Alert',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onBackground,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          FutureBuilder<String>(
-                            future: _translateText(
-                                'Your CIBIL score is 750. You\'re eligible for a personal loan at 9.5% interest from XYZ Bank.'),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Text(
-                                  snapshot.data ??
-                                      'Your CIBIL score is 750. You\'re eligible for a personal loan at 9.5% interest from XYZ Bank.',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: theme.colorScheme.onBackground
-                                        .withOpacity(0.7),
-                                  ),
-                                );
-                              } else {
-                                return const CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Financial Health Recommendations
-              FutureBuilder<String>(
-                future: _translateText('Financial Health Recommendations'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return FinancialCard(
-                      title:
-                          snapshot.data ?? 'Financial Health Recommendations',
-                      child: Column(
-                        children: [
-                          RecommendationItem(
-                            icon: Icons.credit_card,
-                            title: 'Reduce credit card debt',
-                            description:
-                                'Pay off 20% of your credit card balance within the next 30 days to improve your credit score.',
-                            progress: 0.2,
-                            progressColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          RecommendationItem(
-                            icon: Icons.savings,
-                            title: 'Increase savings',
-                            description:
-                                'Consider automating monthly savings of ₹5,000 to build your emergency fund.',
-                            progress: 0.5,
-                            progressColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          RecommendationItem(
-                            icon: Icons.trending_up,
-                            title: 'Improve credit mix',
-                            description:
-                                'Diversifying your credit sources can help improve your score over time.',
-                            progress: 0.15,
-                            progressColor: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 24),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color:
-                                  theme.colorScheme.secondary.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(height: 24),
+                            Row(
                               children: [
+                                Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFFF8E1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.warning_amber_outlined,
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      FutureBuilder<String>(
+                                        future: _translateText(
+                                            'Security Recommendation'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ??
+                                                  'Security Recommendation',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: theme
+                                                    .colorScheme.onBackground,
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(height: 4),
+                                      FutureBuilder<String>(
+                                        future: _translateText(
+                                            'It\'s been 3 months since you last updated your password. Consider changing it for enhanced security.'),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.done) {
+                                            return Text(
+                                              snapshot.data ??
+                                                  'It\'s been 3 months since you last updated your password. Consider changing it for enhanced security.',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: theme
+                                                    .colorScheme.onBackground
+                                                    .withOpacity(0.7),
+                                              ),
+                                            );
+                                          } else {
+                                            return const CircularProgressIndicator();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.secondary,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: FutureBuilder<String>(
+                                  future: _translateText('Update Password'),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      return Text(
+                                        snapshot.data ?? 'Update Password',
+                                        style: TextStyle(
+                                          color: theme.colorScheme.onSecondary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      );
+                                    } else {
+                                      return const CircularProgressIndicator();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today,
+                                    color: theme.colorScheme.onBackground),
+                                const SizedBox(width: 12),
                                 FutureBuilder<String>(
-                                  future: _translateText(
-                                      'Personalized Financial Goal'),
+                                  future:
+                                      _translateText('Predictive Bill Reminders'),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.done) {
                                       return Text(
                                         snapshot.data ??
-                                            'Personalized Financial Goal',
+                                            'Predictive Bill Reminders',
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -458,425 +834,58 @@ class _HomeScreenState extends State<HomeScreen> {
                                     }
                                   },
                                 ),
-                                const SizedBox(height: 8),
-                                FutureBuilder<String>(
-                                  future: _translateText(
-                                      'Save ₹10,000 by the end of this quarter'),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      return Text(
-                                        snapshot.data ??
-                                            'Save ₹10,000 by the end of this quarter',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: theme.colorScheme.onBackground
-                                              .withOpacity(0.7),
-                                        ),
-                                      );
-                                    } else {
-                                      return const CircularProgressIndicator();
-                                    }
-                                  },
-                                ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // Query & Complaint Tracking
-              FutureBuilder<String>(
-                future: _translateText('Query & Complaint Tracking'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return FinancialCard(
-                      title: snapshot.data ?? 'Query & Complaint Tracking',
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FutureBuilder<String>(
-                            future: _translateText('Active Queries'),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Text(
-                                  snapshot.data ?? 'Active Queries',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onBackground,
-                                  ),
-                                );
-                              } else {
-                                return const CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          QueryItem(
-                            icon: Icons.error_outline,
-                            iconColor: Colors.red,
-                            title: 'Unauthorized Transaction',
-                            status: 'Under Review - Est. 2 days',
-                            onTap: () {},
-                          ),
-                          const SizedBox(height: 12),
-                          QueryItem(
-                            icon: Icons.access_time,
-                            iconColor: theme.colorScheme.primary,
-                            title: 'Loan Application',
-                            status: 'Processing - Est. 3 days',
-                            onTap: () {},
-                          ),
-                          const SizedBox(height: 24),
-                          FutureBuilder<String>(
-                            future: _translateText('Resolved Queries'),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Text(
-                                  snapshot.data ?? 'Resolved Queries',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.colorScheme.onBackground,
-                                  ),
-                                );
-                              } else {
-                                return const CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          QueryItem(
-                            icon: Icons.check_circle_outline,
-                            iconColor: Colors.green,
-                            title: 'Account Statement Request',
-                            status: 'Resolved on 2023-05-15',
-                            onTap: () {},
-                            showButton: false,
-                          ),
-                          const SizedBox(height: 12),
-                          QueryItem(
-                            icon: Icons.check_circle_outline,
-                            iconColor: Colors.green,
-                            title: 'Credit Limit Increase',
-                            status: 'Resolved on 2023-05-10',
-                            onTap: () {},
-                            showButton: false,
-                          ),
-                          const SizedBox(height: 16),
-                          // In your HomeScreen file, update the "Chat with AI Assistant" button:
-
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    translator: widget.translator,
-                                    currentLanguage: _currentLanguage,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.chat_bubble_outline,
-                                      color: theme.colorScheme.onPrimary),
-                                  const SizedBox(width: 8),
-                                  FutureBuilder<String>(
-                                    future: _translateText(
-                                        'Chat with AI Assistant'),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.done) {
-                                        return Text(
-                                          snapshot.data ??
-                                              'Chat with AI Assistant',
-                                          style: TextStyle(
-                                            color: theme.colorScheme.onPrimary,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                        );
-                                      } else {
-                                        return const CircularProgressIndicator();
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(height: 16),
+                            CalendarWidget(),
+                            const SizedBox(height: 12),
+                            FutureBuilder<String>(
+                              future: _translateText(
+                                  'Upcoming bill: Electricity payment due on 25th'),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return Text(
+                                    snapshot.data ??
+                                        'Upcoming bill: Electricity payment due on 25th',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: theme.colorScheme.onBackground
+                                          .withOpacity(0.7),
+                                    ),
+                                  );
+                                } else {
+                                  return const CircularProgressIndicator();
+                                }
+                              },
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-
-              // AI-Powered Insights & Alerts
-              FutureBuilder<String>(
-                future: _translateText('AI-Powered Insights & Alerts'),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return FinancialCard(
-                      title: snapshot.data ?? 'AI-Powered Insights & Alerts',
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE0F2E9),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.shield_outlined,
-                                  color: Colors.green,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    FutureBuilder<String>(
-                                      future: _translateText(
-                                          'Fraud Detection Alerts'),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return Text(
-                                            snapshot.data ??
-                                                'Fraud Detection Alerts',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: theme
-                                                  .colorScheme.onBackground,
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator();
-                                        }
-                                      },
-                                    ),
-                                    const SizedBox(height: 4),
-                                    FutureBuilder<String>(
-                                      future: _translateText(
-                                          'No suspicious activity detected in the last 30 days.'),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return Text(
-                                            snapshot.data ??
-                                                'No suspicious activity detected in the last 30 days.',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: theme
-                                                  .colorScheme.onBackground
-                                                  .withOpacity(0.7),
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator();
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFFFF8E1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.warning_amber_outlined,
-                                  color: Colors.amber,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    FutureBuilder<String>(
-                                      future: _translateText(
-                                          'Security Recommendation'),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return Text(
-                                            snapshot.data ??
-                                                'Security Recommendation',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: theme
-                                                  .colorScheme.onBackground,
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator();
-                                        }
-                                      },
-                                    ),
-                                    const SizedBox(height: 4),
-                                    FutureBuilder<String>(
-                                      future: _translateText(
-                                          'It\'s been 3 months since you last updated your password. Consider changing it for enhanced security.'),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.done) {
-                                          return Text(
-                                            snapshot.data ??
-                                                'It\'s been 3 months since you last updated your password. Consider changing it for enhanced security.',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: theme
-                                                  .colorScheme.onBackground
-                                                  .withOpacity(0.7),
-                                            ),
-                                          );
-                                        } else {
-                                          return const CircularProgressIndicator();
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.secondary,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: FutureBuilder<String>(
-                                future: _translateText('Update Password'),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    return Text(
-                                      snapshot.data ?? 'Update Password',
-                                      style: TextStyle(
-                                        color: theme.colorScheme.onSecondary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    );
-                                  } else {
-                                    return const CircularProgressIndicator();
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_today,
-                                  color: theme.colorScheme.onBackground),
-                              const SizedBox(width: 12),
-                              FutureBuilder<String>(
-                                future:
-                                    _translateText('Predictive Bill Reminders'),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    return Text(
-                                      snapshot.data ??
-                                          'Predictive Bill Reminders',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.onBackground,
-                                      ),
-                                    );
-                                  } else {
-                                    return const CircularProgressIndicator();
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          CalendarWidget(),
-                          const SizedBox(height: 12),
-                          FutureBuilder<String>(
-                            future: _translateText(
-                                'Upcoming bill: Electricity payment due on 25th'),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return Text(
-                                  snapshot.data ??
-                                      'Upcoming bill: Electricity payment due on 25th',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: theme.colorScheme.onBackground
-                                        .withOpacity(0.7),
-                                  ),
-                                );
-                              } else {
-                                return const CircularProgressIndicator();
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 24),
-              
-            ],
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                
+              ],
+            ),
           ),
         ),
+        VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
+        ],
       ),
+      
     );
   }
 }

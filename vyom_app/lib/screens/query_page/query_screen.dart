@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vyom/screens/query_page/query_success_screen.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart' show VoiceChatBubble;
 
 class VideoQueryScreen extends StatefulWidget {
   @override
@@ -282,7 +283,16 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                 ],
               ),
             ),
-            
+            VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
           ],
         ),
       ),

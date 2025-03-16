@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 
 class CreditInsightsScreen extends StatefulWidget {
   const CreditInsightsScreen({Key? key}) : super(key: key);
@@ -33,20 +34,33 @@ class _CreditInsightsScreenState extends State<CreditInsightsScreen> with Single
         foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-       
-          _buildTabBar(),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildCreditBreakdownTab(),
-                _buildFinancialHealthTab(),
-                _buildSpendingOptimizationTab(),
-              ],
+      body: Stack(
+        children: [Column(
+          children: [
+         
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildCreditBreakdownTab(),
+                  _buildFinancialHealthTab(),
+                  _buildSpendingOptimizationTab(),
+                ],
+              ),
             ),
-          ),
+          ],
+        ),
+         VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:vyom/signup_screen.dart';
 import 'login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -79,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         if (isLastPage) {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            MaterialPageRoute(builder: (context) => const SignupScreen()),
                           );
                         } else {
                           controller.nextPage(

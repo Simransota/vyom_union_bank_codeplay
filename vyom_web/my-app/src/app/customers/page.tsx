@@ -1,4 +1,4 @@
-import { AppointmentScheduler } from "../components/appointment-scheduler"
+import  AppointmentScheduler  from "../components/appointment-scheduler"
 import BankDashboard from "../components/bank-dashboard"
 
 export default function AppointmentsPage() {

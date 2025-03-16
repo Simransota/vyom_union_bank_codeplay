@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vyom/screens/query_page/query_screen.dart';
+import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import '../../widgets/financial_card.dart';
 import './query_tracking_screen.dart';
 import '../../widgets/query_filter_sheet.dart';
@@ -183,114 +184,131 @@ class _QueryHistoryScreenState extends State<QueryHistoryScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by ID or keywords',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+          Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by ID or keywords',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
             ),
-          ),
-          
-          // Filter Chips
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Chip(
-                  label: Text(_sortBy),
-                  avatar: const Icon(Icons.sort, size: 16),
-                  backgroundColor: theme.colorScheme.secondary.withOpacity(0.3),
-                ),
-                const SizedBox(width: 8),
-                Chip(
-                  label: Text(_filterBy),
-                  avatar: const Icon(Icons.filter_alt, size: 16),
-                  backgroundColor: theme.colorScheme.secondary.withOpacity(0.3),
-                ),
-                const Spacer(),
-                Text(
-                  '${filteredQueries.length} Queries',
-                  style: TextStyle(
-                    color: theme.colorScheme.onBackground.withOpacity(0.7),
+            
+            // Filter Chips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Chip(
+                    label: Text(_sortBy),
+                    avatar: const Icon(Icons.sort, size: 16),
+                    backgroundColor: theme.colorScheme.secondary.withOpacity(0.3),
                   ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Query List
-          Expanded(
-            child: filteredQueries.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: theme.colorScheme.onBackground.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No queries found',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: theme.colorScheme.onBackground.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(width: 8),
+                  Chip(
+                    label: Text(_filterBy),
+                    avatar: const Icon(Icons.filter_alt, size: 16),
+                    backgroundColor: theme.colorScheme.secondary.withOpacity(0.3),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${filteredQueries.length} Queries',
+                    style: TextStyle(
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredQueries.length,
-                    itemBuilder: (context, index) {
-                      final query = filteredQueries[index];
-                      return _buildQueryCard(context, query);
-                    },
                   ),
-          ),
+                ],
+              ),
+            ),
+            
+            // Query List
+            Expanded(
+              child: filteredQueries.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: theme.colorScheme.onBackground.withOpacity(0.3),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No queries found',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: theme.colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredQueries.length,
+                      itemBuilder: (context, index) {
+                        final query = filteredQueries[index];
+                        return _buildQueryCard(context, query);
+                      },
+                    ),
+            ),
+          ],
+        ),
+        VoiceChatBubble(
+          onMessageReceived: (message) {
+            // Handle received message
+            print("Assistant: $message");
+          },
+          onUserMessage: (message) {
+            // Handle user message
+            print("User: $message");
+          },
+        ),
         ],
+
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => VideoQueryScreen()),
-                );
-        },
-        backgroundColor: theme.colorScheme.primary,
-        child: const Icon(Icons.add),
-      ),
+      
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+  floatingActionButton: FloatingActionButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => VideoQueryScreen()),
+      );
+    },
+    backgroundColor: theme.colorScheme.primary,
+    child: const Icon(Icons.add),
+  ),
     );
   }
 
