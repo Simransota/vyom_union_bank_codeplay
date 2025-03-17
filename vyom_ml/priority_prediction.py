@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import mean_absolute_error, r2_score
 
 # Load dataset
-df = pd.read_csv("data/bank_customer_priority_dataset.csv")  # Replace with actual dataset filename
+df = pd.read_csv("vyom_ml/data/bank_customer_priority_dataset.csv")  # Replace with actual dataset filename
 
 # Define features and target variable
 X = df.drop(columns=["Priority Score"])
@@ -38,11 +38,11 @@ best_model = grid_search.best_estimator_
 print("Best Hyperparameters:", best_params)
 
 # Save the best model as a pickle file
-model_filename = "xgboost_priority_model.pkl"
-with open(model_filename, "wb") as file:
-    pickle.dump(best_model, file)
+# model_filename = "xgboost_priority_model.pkl"
+# with open(model_filename, "wb") as file:
+#     pickle.dump(best_model, file)
 
-print(f"Model saved as {model_filename}")
+# print(f"Model saved as {model_filename}")
 
 # Predictions on test set
 y_pred = best_model.predict(X_test)
@@ -53,6 +53,6 @@ r2 = r2_score(y_test, y_pred)
 
 print("Mean Absolute Error:", mae)
 print("R^2 Score:", r2)
-
+print(X.columns)
 # Function to load the model and make predictions for manual input
 
