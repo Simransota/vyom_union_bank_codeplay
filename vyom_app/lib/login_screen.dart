@@ -252,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                      MaterialPageRoute(builder: (context) => const AadhaarScannerScreen()),
                     );
                   },
                 ),

@@ -17,8 +17,8 @@ class _SignupScreenState extends State<SignupScreen> {
   
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final panCardController = TextEditingController();
-  final aadhaarCardController = TextEditingController();
+  // final panCardController = TextEditingController();
+  // final aadhaarCardController = TextEditingController();
   final addressController = TextEditingController();
   DateTime? selectedDate;
   bool isLoading = false;
@@ -32,8 +32,8 @@ class _SignupScreenState extends State<SignupScreen> {
    
     emailController.dispose();
     passwordController.dispose();
-    panCardController.dispose();
-    aadhaarCardController.dispose();
+    // panCardController.dispose();
+    // aadhaarCardController.dispose();
     addressController.dispose();
     super.dispose();
   }
@@ -67,14 +67,14 @@ class _SignupScreenState extends State<SignupScreen> {
    
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-    final panCard = panCardController.text.trim();
-    final aadhaarCard = aadhaarCardController.text.trim();
+    // final panCard = panCardController.text.trim();
+    // final aadhaarCard = aadhaarCardController.text.trim();
     final address = addressController.text.trim();
 
     // Validate form inputs
     if (name.isEmpty || accountNumber.isEmpty || 
-        email.isEmpty || password.isEmpty || panCard.isEmpty ||
-        aadhaarCard.isEmpty || address.isEmpty || selectedDate == null) {
+        email.isEmpty || password.isEmpty ||
+        address.isEmpty || selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text(
           "Please fill all the details",
@@ -97,8 +97,8 @@ class _SignupScreenState extends State<SignupScreen> {
           'full_name': name,
           'account_number': accountNumber,
          
-          'pan_card': panCard,
-          'aadhaar_card': aadhaarCard,
+          // 'pan_card': panCard,
+          // 'aadhaar_card': aadhaarCard,
           'date_of_birth': selectedDate?.toIso8601String(),
           'address': address,
         },
@@ -180,31 +180,31 @@ class _SignupScreenState extends State<SignupScreen> {
             const SizedBox(height: 16),
            
             // PAN Card field
-            TextFormField(
-              controller: panCardController,
-              decoration: InputDecoration(
-                labelText: 'PAN Card Number',
-                prefixIcon: const Icon(Icons.credit_card),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              textCapitalization: TextCapitalization.characters,
-            ),
-            const SizedBox(height: 16),
-            // Aadhaar Card field
-            TextFormField(
-              controller: aadhaarCardController,
-              decoration: InputDecoration(
-                labelText: 'Aadhaar Card Number',
-                prefixIcon: const Icon(Icons.credit_card),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
+            // TextFormField(
+            //   controller: panCardController,
+            //   decoration: InputDecoration(
+            //     labelText: 'PAN Card Number',
+            //     prefixIcon: const Icon(Icons.credit_card),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //   ),
+            //   textCapitalization: TextCapitalization.characters,
+            // ),
+            // const SizedBox(height: 16),
+            // // Aadhaar Card field
+            // TextFormField(
+            //   controller: aadhaarCardController,
+            //   decoration: InputDecoration(
+            //     labelText: 'Aadhaar Card Number',
+            //     prefixIcon: const Icon(Icons.credit_card),
+            //     border: OutlineInputBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //   ),
+            //   keyboardType: TextInputType.number,
+            // ),
+            // const SizedBox(height: 16),
             // Date of Birth field
             InkWell(
               onTap: () => _selectDate(context),

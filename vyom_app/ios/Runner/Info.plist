@@ -4,6 +4,9 @@
 <dict>
     <!-- Camera, Microphone,Video and Photo Library Permissions -->
 
+    <key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
+
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access to capture videos.</string>
 

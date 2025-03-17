@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:translator/translator.dart'; // Import translator package
+import 'package:vyom/api/firebase_api.dart';
 import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
 import 'package:vyom/screens/offers_page/offers_page.dart';
 import 'package:vyom/screens/query_page/query_history_screen.dart';
 import 'package:vyom/screens/voice_asstance/voice_assistance.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:vyom/login_screen.dart';
 import 'package:vyom/onboardingscreen.dart';
 import 'package:vyom/screens/query_page/appointment_booking_screen.dart';
@@ -18,11 +19,13 @@ import 'package:vyom/screens/voice_asstance/voice_assistant_demo_screen.dart';
 import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import 'package:vyom/signup_screen.dart';
 import '../screens/home_screen.dart';
-
+import 'api/firebase_api.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:vyom/screens/camera_upload_page.dart';
 void main() async {
-  /// TODO: update Supabase credentials with your own
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await FirebaseApi.initNotification();
   await Supabase.initialize(
     url: 'https://jcwhtqipkdxuuoakxqqi.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd2h0cWlwa2R4dXVvYWt4cXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDU0MjMsImV4cCI6MjA1NzYyMTQyM30.16jYRAnjmEHs4P_USk7TBKns0osB4vw-PmN3L5CfEVk',
@@ -62,7 +65,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // home: HomeScreen(translator: translator),
-      home: SignupScreen(),
+      home: LoginScreen(),
     );
   }
 }

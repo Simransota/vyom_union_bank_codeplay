@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/Users/simransota/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/simransota/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/simransota/Desktop/vyom_union_bank_hackathon/vyom_app/android/app/.cxx/Debug/2v2g4h1j/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/simransota/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/simransota/Desktop/vyom_union_bank_hackathon/vyom_app/android/app/.cxx/Debug/2v2g4h1j/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/simransota/Library/Android/sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/simransota/Library/Android/sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}
