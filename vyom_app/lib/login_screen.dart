@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:translator/translator.dart';
+import 'package:vyom/main.dart';
 import 'package:vyom/onboardingscreen.dart';
 import './screens/home_screen.dart';
 import 'signup_screen.dart';
@@ -32,8 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    showGlobalChatBubble = false; 
     _checkBiometricSupport();
   }
+
+
 
   @override
   void dispose() {

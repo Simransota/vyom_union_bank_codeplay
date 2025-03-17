@@ -438,16 +438,16 @@ class _OffersPageState extends State<OffersPage> {
             ],
           ),
         ),
-         VoiceChatBubble(
-          onMessageReceived: (message) {
-            // Handle received message
-            print("Assistant: $message");
-          },
-          onUserMessage: (message) {
-            // Handle user message
-            print("User: $message");
-          },
-        ),
+        //  VoiceChatBubble(
+        //   onMessageReceived: (message) {
+        //     // Handle received message
+        //     print("Assistant: $message");
+        //   },
+        //   onUserMessage: (message) {
+        //     // Handle user message
+        //     print("User: $message");
+        //   },
+        //),
         ],
       ),
     );

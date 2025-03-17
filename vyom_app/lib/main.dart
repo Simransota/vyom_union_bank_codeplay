@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:translator/translator.dart'; // Import translator package
+import 'package:translator/translator.dart';
 import 'package:vyom/api/firebase_api.dart';
 import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
 import 'package:vyom/screens/offers_page/offers_page.dart';
 import 'package:vyom/screens/query_page/query_history_screen.dart';
+import 'package:vyom/screens/transaction_page/transaction_page.dart';
 import 'package:vyom/screens/voice_asstance/voice_assistance.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:vyom/login_screen.dart';
@@ -14,14 +15,18 @@ import 'package:vyom/screens/query_page/appointment_booking_screen.dart';
 import 'package:vyom/screens/query_page/feedback_screen.dart';
 import 'package:vyom/screens/query_page/query_screen.dart';
 import 'package:vyom/screens/query_page/query_tracking_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:vyom/screens/voice_asstance/voice_assistant_demo_screen.dart';
+import 'package:vyom/screens/voice_asstance/voice_auth.dart';
 import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import 'package:vyom/signup_screen.dart';
-import '../screens/home_screen.dart';
-import 'api/firebase_api.dart';
+import 'package:vyom/screens/home_screen.dart';
+import 'package:vyom/api/firebase_api.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vyom/screens/camera_upload_page.dart';
+
+// Global key for navigator to access current context
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -35,6 +40,10 @@ void main() async {
 
 final supabase = Supabase.instance.client;
 
+// Add this at the top of your main.dart file, outside of any class
+// This global variable controls whether the chat bubble is shown
+bool showGlobalChatBubble = false;
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -44,6 +53,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Chatbot UI',
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.light(
@@ -64,11 +74,235 @@ class MyApp extends StatelessWidget {
           displayColor: Colors.black,
         ),
       ),
-      // home: HomeScreen(translator: translator),
-      home: LoginScreen(),
+      builder: (context, child) {
+        // This builder wraps the entire app to conditionally add the VoiceChatBubble
+        return Stack(
+          children: [
+            child!,
+            // Only show the bubble if showGlobalChatBubble is true
+            if (showGlobalChatBubble)
+        Positioned(
+          bottom: 80,
+          right: 20,
+          child: VoiceChatBubble(),
+        ),
+          ],
+        );
+      },
+      home: VideoQueryScreen(),
+      //home: HomeScreen(translator: translator,),
     );
   }
 }
+
+
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import 'package:translator/translator.dart';
+// import 'package:vyom/api/firebase_api.dart';
+// import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
+// import 'package:vyom/screens/offers_page/offers_page.dart';
+// import 'package:vyom/screens/query_page/query_history_screen.dart';
+// import 'package:vyom/screens/voice_asstance/voice_assistance.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:vyom/login_screen.dart';
+// import 'package:vyom/onboardingscreen.dart';
+// import 'package:vyom/screens/query_page/appointment_booking_screen.dart';
+// import 'package:vyom/screens/query_page/feedback_screen.dart';
+// import 'package:vyom/screens/query_page/query_screen.dart';
+// import 'package:vyom/screens/query_page/query_tracking_screen.dart';
+// import 'package:vyom/screens/voice_asstance/voice_assistant_demo_screen.dart';
+// import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
+// import 'package:vyom/signup_screen.dart';
+// import 'package:vyom/screens/home_screen.dart';
+// import 'package:vyom/api/firebase_api.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:vyom/screens/camera_upload_page.dart';
+
+// // Global key for navigator to access current context
+// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   await FirebaseApi.initNotification();
+//   await Supabase.initialize(
+//     url: 'https://jcwhtqipkdxuuoakxqqi.supabase.co',
+//     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd2h0cWlwa2R4dXVvYWt4cXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDU0MjMsImV4cCI6MjA1NzYyMTQyM30.16jYRAnjmEHs4P_USk7TBKns0osB4vw-PmN3L5CfEVk',
+//   );
+//   runApp(const MyApp());
+// }
+
+// final supabase = Supabase.instance.client;
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final translator = GoogleTranslator();
+
+//     return MaterialApp(
+//       title: 'Chatbot UI',
+//       navigatorKey: navigatorKey, // Set the navigator key
+//       theme: ThemeData(
+//         useMaterial3: true,
+//         colorScheme: ColorScheme.light(
+//           primary: const Color(0xFF233B99),
+//           secondary: const Color.fromARGB(255, 213, 220, 248),
+//           surface: Colors.white,
+//           background: const Color(0xFFF8F8F8),
+//           onPrimary: Colors.white,
+//           onSecondary: Colors.black,
+//           onSurface: Colors.black,
+//           onBackground: Colors.black,
+//           error: const Color(0xFFE63946),
+//         ),
+//         textTheme: GoogleFonts.interTextTheme(
+//           Theme.of(context).textTheme,
+//         ).apply(
+//           bodyColor: Colors.black,
+//           displayColor: Colors.black,
+//         ),
+//       ),
+//       builder: (context, child) {
+//         // This builder wraps the entire app to add the VoiceChatBubble
+//         return Stack(
+//           children: [
+//             child!,
+//             // Add the VoiceChatBubble to all screens
+//             Positioned(
+//               bottom: 80,
+//               right: 20,
+//               child: GlobalVoiceChatBubble(),
+//             ),
+//           ],
+//         );
+//       },
+//       //home: HomeScreen(translator: translator),
+//       home: LoginScreen(),
+//     );
+//   }
+// }
+
+// // Global Voice Chat Bubble implementation
+// class GlobalVoiceChatBubble extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return VoiceChatBubble(
+//       onMessageReceived: (message) {
+//         // Handle received message
+//         print("Assistant: $message");
+//         // You can add more logic here if needed
+//       },
+//       onUserMessage: (message) {
+//         // Handle user message
+//         print("User: $message");
+//         // You can add more logic here if needed
+//       },
+//     );
+//   }
+// }
+
+// // Original FloatingVoiceBubble class (kept as a utility)
+// class FloatingVoiceBubble {
+//   // Show the bubble programmatically if needed in specific cases
+//   static void show(BuildContext context) {
+//     final overlayState = Overlay.of(context);
+//     final overlayEntry = OverlayEntry(
+//       builder: (context) => Positioned(
+//         bottom: 80,
+//         right: 20,
+//         child: GlobalVoiceChatBubble(),
+//       ),
+//     );
+//     overlayState.insert(overlayEntry);
+//   }
+  
+//   // Hide the bubble if needed
+//   static void hide(OverlayEntry entry) {
+//     entry.remove();
+//   }
+// }
+
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import 'package:translator/translator.dart'; // Import translator package
+// import 'package:vyom/api/firebase_api.dart';
+// import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
+// import 'package:vyom/screens/offers_page/offers_page.dart';
+// import 'package:vyom/screens/query_page/query_history_screen.dart';
+// import 'package:vyom/screens/voice_asstance/voice_assistance.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:vyom/login_screen.dart';
+// import 'package:vyom/onboardingscreen.dart';
+// import 'package:vyom/screens/query_page/appointment_booking_screen.dart';
+// import 'package:vyom/screens/query_page/feedback_screen.dart';
+// import 'package:vyom/screens/query_page/query_screen.dart';
+// import 'package:vyom/screens/query_page/query_tracking_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:vyom/screens/voice_asstance/voice_assistant_demo_screen.dart';
+// import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
+// import 'package:vyom/signup_screen.dart';
+// import '../screens/home_screen.dart';
+// import 'api/firebase_api.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:vyom/screens/camera_upload_page.dart';
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp();
+//   await FirebaseApi.initNotification();
+//   await Supabase.initialize(
+//     url: 'https://jcwhtqipkdxuuoakxqqi.supabase.co',
+//     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impjd2h0cWlwa2R4dXVvYWt4cXFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDU0MjMsImV4cCI6MjA1NzYyMTQyM30.16jYRAnjmEHs4P_USk7TBKns0osB4vw-PmN3L5CfEVk',
+//   );
+//   runApp(const MyApp());
+// }
+
+// final supabase = Supabase.instance.client;
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final translator = GoogleTranslator();
+
+//     return MaterialApp(
+//       title: 'Chatbot UI',
+//       theme: ThemeData(
+//         useMaterial3: true,
+//         colorScheme: ColorScheme.light(
+//           primary: const Color(0xFF233B99),
+//           secondary: const Color.fromARGB(255, 213, 220, 248),
+//           surface: Colors.white,
+//           background: const Color(0xFFF8F8F8),
+//           onPrimary: Colors.white,
+//           onSecondary: Colors.black,
+//           onSurface: Colors.black,
+//           onBackground: Colors.black,
+//           error: const Color(0xFFE63946),
+//         ),
+//         textTheme: GoogleFonts.interTextTheme(
+//           Theme.of(context).textTheme,
+//         ).apply(
+//           bodyColor: Colors.black,
+//           displayColor: Colors.black,
+//         ),
+//       ),
+//       home: HomeScreen(translator: translator),
+//       // home: LoginScreen(),
+//     );
+//   }
+// }
 
 
 

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:vyom/main.dart';
 import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
+  static const String routeName = "/signup";
+
   const SignupScreen({Key? key}) : super(key: key);
 
   @override
@@ -24,7 +27,12 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isLoading = false;
 
   final supabase = Supabase.instance.client;
-
+@override
+  void initState() {
+    super.initState();
+    showGlobalChatBubble = false; 
+   
+  }
   @override
   void dispose() {
     nameController.dispose();
@@ -179,33 +187,6 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 16),
            
-            // PAN Card field
-            // TextFormField(
-            //   controller: panCardController,
-            //   decoration: InputDecoration(
-            //     labelText: 'PAN Card Number',
-            //     prefixIcon: const Icon(Icons.credit_card),
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //   ),
-            //   textCapitalization: TextCapitalization.characters,
-            // ),
-            // const SizedBox(height: 16),
-            // // Aadhaar Card field
-            // TextFormField(
-            //   controller: aadhaarCardController,
-            //   decoration: InputDecoration(
-            //     labelText: 'Aadhaar Card Number',
-            //     prefixIcon: const Icon(Icons.credit_card),
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //   ),
-            //   keyboardType: TextInputType.number,
-            // ),
-            // const SizedBox(height: 16),
-            // Date of Birth field
             InkWell(
               onTap: () => _selectDate(context),
               child: InputDecorator(

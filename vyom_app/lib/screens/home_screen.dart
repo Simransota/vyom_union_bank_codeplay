@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:translator/translator.dart';
+import 'package:vyom/main.dart';
 import 'package:vyom/screens/chat_agent/chat_agent_screen.dart';
 import 'package:vyom/screens/credit_insights_page/credit_insights_page.dart';
 import 'package:vyom/screens/offers_page/offers_page.dart';
@@ -7,6 +8,7 @@ import 'package:vyom/screens/query_page/query_history_screen.dart';
 
 import 'package:vyom/screens/query_page/query_screen.dart';
 import 'package:vyom/screens/query_page/query_tracking_screen.dart';
+import 'package:vyom/screens/transaction_page/transaction_page.dart';
 import 'package:vyom/screens/video_call/join_page.dart';
 import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart';
 import 'package:vyom/widgets/chat_bot.dart';
@@ -18,12 +20,12 @@ import '../widgets/calender_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   final GoogleTranslator translator;
-
   const HomeScreen({Key? key, required this.translator}) : super(key: key);
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
+
+
 
 class _HomeScreenState extends State<HomeScreen> {
   String _currentLanguage = 'en';
@@ -40,6 +42,16 @@ class _HomeScreenState extends State<HomeScreen> {
     'pa': 'ਪੰਜਾਬੀ (Punjabi)',
     'or': 'ଓଡ଼ିଆ (Odia)',
   };
+
+  @override
+void initState() {
+  super.initState();
+  // Make sure to set this to true
+  showGlobalChatBubble = true;
+  print("Setting showGlobalChatBubble to TRUE in HomeScreen");
+  // Rest of your initialization
+}
+
 
   Future<String> _translateText(String text) async {
     if (_currentLanguage == 'en') {
@@ -190,10 +202,13 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.language),
-              title: Text('Change Language'),
+              leading: Icon(Icons.money),
+              title: Text('Transaction'),
               onTap: () {
-                Navigator.pop(context);
+               Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TransactionPage()),
+                );
               },
             ),
           ],
@@ -873,16 +888,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        VoiceChatBubble(
-          onMessageReceived: (message) {
-            // Handle received message
-            print("Assistant: $message");
-          },
-          onUserMessage: (message) {
-            // Handle user message
-            print("User: $message");
-          },
-        ),
+        // VoiceChatBubble(
+        //   onMessageReceived: (message) {
+        //     // Handle received message
+        //     print("Assistant: $message");
+        //   },
+        //   onUserMessage: (message) {
+        //     // Handle user message
+        //     print("User: $message");
+        //   },
+        // ),
         ],
       ),
       

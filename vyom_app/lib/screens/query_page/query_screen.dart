@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:convert'; // For JSON decoding and base64 encoding
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vyom/screens/query_page/query_success_screen.dart';
 import 'package:vyom/screens/voice_asstance/voice_chat_bubble.dart' show VoiceChatBubble;
+import 'package:image_picker/image_picker.dart'; // For picking video from gallery
+import 'package:http/http.dart' as http; // For HTTP requests
 
 class VideoQueryScreen extends StatefulWidget {
   @override
@@ -16,7 +19,6 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
   VideoPlayerController? _videoPlayerController;
   bool _isRecording = false;
   String? _videoPath;
-  
 
   @override
   void initState() {
@@ -25,29 +27,28 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
   }
 
   Future<void> _initializeCamera() async {
-  final cameras = await availableCameras();
-  if (cameras.isEmpty) {
-    print('No cameras available');
-    return;
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) {
+      print('No cameras available');
+      return;
+    }
+
+    // Find the front camera
+    final frontCamera = cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.front,
+      orElse: () => cameras.first,
+    );
+
+    _cameraController = CameraController(frontCamera, ResolutionPreset.high);
+
+    try {
+      _initializeControllerFuture = _cameraController!.initialize();
+      await _initializeControllerFuture;
+      if (mounted) setState(() {});
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
-
-  // Find the front camera
-  final frontCamera = cameras.firstWhere(
-    (camera) => camera.lensDirection == CameraLensDirection.front,
-    orElse: () => cameras.first, // Default to first camera if no front camera is found
-  );
-
-  _cameraController = CameraController(frontCamera, ResolutionPreset.high);
-
-  try {
-    _initializeControllerFuture = _cameraController!.initialize();
-    await _initializeControllerFuture;
-    if (mounted) setState(() {});
-  } catch (e) {
-    print('Error initializing camera: $e');
-  }
-}
-
 
   Future<void> _startRecording() async {
     if (_cameraController == null || !_cameraController!.value.isInitialized) return;
@@ -88,6 +89,77 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
       });
   }
 
+  // Function to show the results dialog
+  Future<void> _showResultsDialog(Map<String, dynamic> data) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Video Processing Results'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Classification: ${data["classification"]}'),
+            Text('Antispoof Result: ${data["verification_results"]["antispoof_result"]}'),
+            Text('Verification Result: ${data["verification_results"]["verification_result"]}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('OK'),
+          )
+        ],
+      ),
+    );
+  }
+
+  // Function to pick video from gallery, encode it in Base64, upload it, and display results
+  Future<void> _uploadVideoFromGallery() async {
+    final picker = ImagePicker();
+    // Pick a video from the gallery
+    final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+    if (pickedFile == null) {
+      // User canceled picking a video
+      return;
+    }
+
+    final videoFile = File(pickedFile.path);
+    final bytes = await videoFile.readAsBytes();
+    final videoBase64 = base64Encode(bytes);
+
+    // Create the JSON body
+    final Map<String, dynamic> jsonBody = {
+      "video_base64": videoBase64,
+    };
+
+    final url = Uri.parse('https://risks-its-trace-butts.trycloudflare.com/process_video');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(jsonBody),
+      );
+
+      if (response.statusCode == 200) {
+        // Decode the response
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        // Show the dialog with results
+        _showResultsDialog(jsonResponse);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload video. Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('Error uploading video: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading video')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _cameraController?.dispose();
@@ -103,8 +175,6 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
       return;
     }
 
-    
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -115,8 +185,6 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
       ),
     );
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -153,13 +221,12 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'To submit a query, you need to record a video explaining your issue or feedback. ',
+                    'To submit a query, you need to record a video explaining your issue or feedback.',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
                     ),
                   ),
-                  
                   SizedBox(height: 20),
                   Expanded(
                     child: Container(
@@ -208,13 +275,13 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                                     return ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6, // Increase height
-                      child: CameraPreview(_cameraController!),
-                    ),
+                                        height: MediaQuery.of(context).size.height * 0.6,
+                                        child: CameraPreview(_cameraController!),
+                                      ),
                                     );
                                   } else {
                                     return Container(
-                                      color: Color(0xFFEEFFAA), // Light green color as shown in the image
+                                      color: Color(0xFFEEFFAA),
                                     );
                                   }
                                 },
@@ -229,7 +296,7 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                     child: ElevatedButton(
                       onPressed: _isRecording ? _stopRecording : _startRecording,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary, // Deep blue color
+                        backgroundColor: theme.colorScheme.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),
                         ),
@@ -239,7 +306,30 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  // Upload Video from Gallery Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _uploadVideoFromGallery,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      child: Text(
+                        'Upload Video from Gallery',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -263,7 +353,7 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                       ElevatedButton(
                         onPressed: _submitQuery,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary, // Deep blue color
+                          backgroundColor: theme.colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
@@ -274,7 +364,7 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,  
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -283,16 +373,15 @@ class _VideoQueryScreenState extends State<VideoQueryScreen> {
                 ],
               ),
             ),
-            VoiceChatBubble(
-          onMessageReceived: (message) {
-            // Handle received message
-            print("Assistant: $message");
-          },
-          onUserMessage: (message) {
-            // Handle user message
-            print("User: $message");
-          },
-        ),
+            // Optionally, add VoiceChatBubble if required
+            // VoiceChatBubble(
+            //   onMessageReceived: (message) {
+            //     print("Assistant: $message");
+            //   },
+            //   onUserMessage: (message) {
+            //     print("User: $message");
+            //   },
+            // ),
           ],
         ),
       ),

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:vyom/main.dart';
 import 'package:vyom/onboardingscreen.dart';
 import 'package:vyom/signup_screen.dart';
 class CameraUploadPanScreen extends StatefulWidget {
+
+
   const CameraUploadPanScreen({Key? key}) : super(key: key);
 
   @override
@@ -23,6 +26,7 @@ class _CameraUploadPanScreenState extends State<CameraUploadPanScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
+     showGlobalChatBubble = false; 
   }
 
   Future<void> _initializeCamera() async {

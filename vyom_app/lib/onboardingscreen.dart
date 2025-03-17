@@ -151,15 +151,28 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:vyom/main.dart';
 import 'package:vyom/screens/camera_upload_page.dart';
 import 'package:vyom/screens/camera_upload_pancard.dart';
 import 'package:vyom/signup_screen.dart';
 
 
 
-class AadhaarScannerScreen extends StatelessWidget {
+class AadhaarScannerScreen extends StatefulWidget {
+
+
   const AadhaarScannerScreen({Key? key}) : super(key: key);
 
+  @override
+  State<AadhaarScannerScreen> createState() => _AadhaarScannerScreenState();
+}
+
+class _AadhaarScannerScreenState extends State<AadhaarScannerScreen> {
+   @override
+  void initState() {
+    super.initState();
+     showGlobalChatBubble = false; 
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,9 +283,21 @@ class AadhaarScannerScreen extends StatelessWidget {
   }
 }
 
-class PanScannerScreen extends StatelessWidget {
+class PanScannerScreen extends StatefulWidget {
+ 
+
   const PanScannerScreen({Key? key}) : super(key: key);
 
+  @override
+  State<PanScannerScreen> createState() => _PanScannerScreenState();
+}
+
+class _PanScannerScreenState extends State<PanScannerScreen> {
+   @override
+  void initState() {
+    super.initState();
+     showGlobalChatBubble = false; 
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
