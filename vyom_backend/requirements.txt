@@ -1,0 +1,7 @@
+pinecone-client
+torch
+transformers
+sentence-transformers
+asyncpg
+aiofiles
+python-multipart

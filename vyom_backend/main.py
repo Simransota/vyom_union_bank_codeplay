@@ -15,7 +15,8 @@ from fastapi.exceptions import RequestValidationError
 from src.utils import is_redis_active
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import redis_client
-from routes import mail_route, query_route, ai_route, util_route,query_route
+from routes import mail_route, ai_route, util_route, query_route, user_route
+from fastapi.staticfiles import StaticFiles
 import os
 
 # Initialize FastAPI app
@@ -38,12 +39,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# Include all routers
+
+# Mount static files for serving user photos
+base_dir = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(base_dir, "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+# Include all routers (only including each router once)
 app.include_router(mail_route.router)
 app.include_router(query_route.router)
 app.include_router(ai_route.router) 
 app.include_router(util_route.router)
-app.include_router(query_route.router)
+app.include_router(user_route.router)
 
 # Global exception handler to ensure all responses are JSON
 @app.exception_handler(RequestValidationError)

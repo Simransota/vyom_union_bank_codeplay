@@ -10,6 +10,8 @@ import datetime
 import random
 import os
 from dotenv import load_dotenv
+import asyncpg
+from typing import Any, List, Tuple, Optional, Union
 
 # Load environment variables
 load_dotenv()
@@ -122,6 +124,58 @@ def execute_query(query, params=None, use_cache=False, cache_key=None, cache_exp
     except Exception as e:
         print(f"Error initializing connection pool: ❌ {e}")
         return None
+
+async def execute_query_async(query: str, params: Optional[Tuple[Any, ...]] = None) -> Union[int, List[dict]]:
+    """
+    Execute a database query asynchronously
+    
+    Parameters:
+        query (str): SQL query to execute
+        params (tuple, optional): Parameters for the SQL query
+    
+    Returns:
+        int or list: The ID of the inserted row (for INSERT operations with RETURNING) 
+                    or a list of results (for SELECT operations)
+    """
+    # Get database connection details from environment variables
+    db_host = os.environ.get("DB_HOST", "localhost")
+    db_port = os.environ.get("DB_PORT", "5432")
+    db_name = os.environ.get("DB_NAME", "postgres")
+    db_user = os.environ.get("DB_USER", "postgres")
+    db_password = os.environ.get("DB_PASSWORD", "postgres")
+    
+    conn = None
+    try:
+        # Connect to the database
+        conn = await asyncpg.connect(
+            host=db_host,
+            port=db_port,
+            database=db_name,
+            user=db_user,
+            password=db_password
+        )
+        
+        if query.strip().upper().startswith("SELECT"):
+            # For SELECT queries, return all results
+            results = await conn.fetch(query, *params) if params else await conn.fetch(query)
+            return [dict(row) for row in results]
+        else:
+            # For INSERT/UPDATE/DELETE queries, return the ID or affected row count
+            if "RETURNING" in query.upper():
+                result = await conn.fetchval(query, *params) if params else await conn.fetchval(query)
+                return result
+            else:
+                result = await conn.execute(query, *params) if params else await conn.execute(query)
+                return int(result.split()[-1]) if "INSERT" in query.upper() else result
+    
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+        raise e
+    
+    finally:
+        # Close the connection
+        if conn:
+            await conn.close()
 
 def upload_file_to_supabase(file_obj: io.BytesIO, file_name: str):
     """
