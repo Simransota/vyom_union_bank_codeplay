@@ -2,6 +2,10 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from dotenv import load_dotenv
 import os
+from pinecone import Pinecone, ServerlessSpec
+pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 load_dotenv()
 # Similarity threshold (75%)
 SIMILARITY_THRESHOLD = 0.50
@@ -80,6 +84,6 @@ def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
     # Round up to the nearest whole number
     return math.ceil(predicted_score)
 
-from pinecone import Pinecone, ServerlessSpec
-pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
-hf_key = os.environ.get("HF_TOKEN")
+
+gemini_api_key="AIzaSyAiTKtMQvBjrTRtHveBfKzL0maKDMqvf0A"
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)

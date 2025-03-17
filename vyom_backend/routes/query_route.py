@@ -48,8 +48,8 @@ async def send_query(name: str, priority: int) -> Dict[str, Any]:
 async def process_query(request_data: QueryRequest) -> Dict[str, Any]:
     """Processes a query and saves it to the database"""
     try:
-        query = request_data.get("query")
-        user_id = request_data.get("user_id")
+        query = request_data.query
+        user_id = request_data.user_id
         
         if not query or not user_id:
             return {
