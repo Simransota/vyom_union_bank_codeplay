@@ -1,3 +1,4 @@
+aiofiles==24.1.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.11.13
 aiohttp-retry==2.9.1
@@ -8,6 +9,7 @@ annotated-types==0.7.0
 anyio==4.8.0
 asgiref==3.8.1
 async-timeout==5.0.1
+asyncpg==0.30.0
 attrs==25.3.0
 billiard==4.2.1
 cachetools==5.5.2
@@ -29,6 +31,7 @@ distro==1.9.0
 Django==5.1.7
 django-timezone-field==7.1
 dnspython==2.7.0
+dotenv==0.9.9
 eventlet==0.39.1
 fastapi==0.115.11
 filelock==3.18.0
@@ -36,6 +39,7 @@ filetype==1.2.0
 flower==2.0.1
 frozenlist==1.5.0
 fsspec==2025.3.0
+GeoAlchemy2==0.17.1
 gevent==24.11.1
 google-ai-generativelanguage==0.6.16
 google-api-core==2.24.2
@@ -73,6 +77,9 @@ neo4j==5.28.1
 numpy==2.2.3
 orjson==3.10.15
 packaging==24.2
+pandas==2.2.3
+pinecone==6.0.2
+pinecone-plugin-interface==0.0.7
 postgrest==0.19.3
 prometheus_client==0.21.1
 prompt_toolkit==3.0.50
@@ -129,6 +136,7 @@ vine==5.1.0
 wcwidth==0.2.13
 websockets==14.2
 wrapt==1.17.2
+xgboost==3.0.0
 yarl==1.18.3
 zope.event==5.0
 zope.interface==7.2

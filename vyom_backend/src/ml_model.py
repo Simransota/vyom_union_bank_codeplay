@@ -118,6 +118,43 @@ def add_documents_to_index(documents, index):
             }]
         )
 
+def split_documents(documents, chunk_size=1000, chunk_overlap=200):
+    """
+    Split documents into smaller chunks for better processing.
+    
+    Parameters:
+        documents (list): List of document dictionaries with 'text' key
+        chunk_size (int): Maximum size of each text chunk
+        chunk_overlap (int): Overlap between consecutive chunks
+        
+    Returns:
+        list: List of dictionaries with split text and original source
+    """
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        length_function=len,
+        is_separator_regex=False,
+    )
+    
+    chunked_documents = []
+    
+    for doc in documents:
+        text = doc["text"]
+        source = doc.get("source", "unknown")
+        
+        # Split the text into chunks
+        chunks = text_splitter.split_text(text)
+        
+        # Create new document objects for each chunk
+        for chunk in chunks:
+            chunked_documents.append({
+                "text": chunk,
+                "source": source
+            })
+    
+    return chunked_documents
+
 def retrieve_relevant_documents(query, index, top_k=3):
     """Retrieve relevant documents based on the query."""
     query_embedding = generate_embeddings(query)
