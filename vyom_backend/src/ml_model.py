@@ -87,3 +87,59 @@ def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
 
 gemini_api_key="AIzaSyAiTKtMQvBjrTRtHveBfKzL0maKDMqvf0A"
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)
+def setup_pinecone_index(index_name="banking-qa"):
+    """Set up or connect to a Pinecone index."""
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=1536,  # assuming OpenAI embeddings
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-west-2")
+        )
+    return pc.Index(index_name)
+
+def generate_embeddings(text):
+    """Generate embeddings for text using the model."""
+    # You can replace this with appropriate embedding model
+    response = llm.invoke(f"Represent this text for retrieval: {text}")
+    # This is a placeholder - in practice you'd use a proper embedding model
+    # For example with langchain_openai: OpenAIEmbeddings().embed_query(text)
+    return response.message.content  
+
+def add_documents_to_index(documents, index):
+    """Add documents to the Pinecone index."""
+    for i, doc in enumerate(documents):
+        embedding = generate_embeddings(doc["text"])
+        index.upsert(
+            vectors=[{
+                "id": f"doc_{i}",
+                "values": embedding,
+                "metadata": {"source": doc.get("source", "unknown")}
+            }]
+        )
+
+def retrieve_relevant_documents(query, index, top_k=3):
+    """Retrieve relevant documents based on the query."""
+    query_embedding = generate_embeddings(query)
+    results = index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
+    return [match["metadata"]["source"] for match in results["matches"]]
+
+def rag_answer_generation(query):
+    """Generate an answer using RAG approach."""
+    index = setup_pinecone_index()
+    
+    # Retrieve relevant contexts
+    relevant_docs = retrieve_relevant_documents(query, index)
+    
+    # Construct prompt with retrieved contexts
+    context = "\n\n".join(relevant_docs)
+    prompt = f"""Based on the following information:
+    
+    {context}
+    
+    Please answer this question: {query}
+    """
+    
+    # Generate answer
+    response = llm.invoke(prompt)
+    return response.content
