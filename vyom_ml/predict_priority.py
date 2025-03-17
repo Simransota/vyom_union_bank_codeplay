@@ -1,3 +1,7 @@
+import pickle
+import math
+import pandas as pd
+
 def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
     """
     Load the trained model and predict the priority score for a given manual input.
@@ -19,7 +23,7 @@ def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
 
     # Create DataFrame from manual input
     input_data = pd.DataFrame([[bank_balance, age, bank_joining_year, asset_value]],
-                              columns=X.columns)  # Ensure feature names match
+                            columns=X.columns)  # Ensure feature names match
 
     # Make prediction
     predicted_score = loaded_model.predict(input_data)[0]

@@ -39,18 +39,17 @@ async def send_query(name: str, priority: int) -> Dict[str, Any]:
         }
 
 @router.post('/process/', response_model=QueryResponse)
-async def process_query(query: str,user_id:str) -> Dict[str, Any]:
+async def process_query(query: str, user_id: str) -> Dict[str, Any]:
     """Processes a query and saves it to the database"""
     try:
-        query_id = process_query_and_save(query,user_id)
-        print(f"Query {query_id} processed")
+        result = process_query_and_save(query, user_id)
+        # Extract the query_id from the result if it's a dictionary
         return {
             "status": "success",
-            "query_id": query_id
+            "query_id": result.get("query_id")
         }
     except Exception as e:
         return {
             "status": "error",
             "message": str(e)
         }
-    

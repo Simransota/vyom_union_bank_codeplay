@@ -435,24 +435,6 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
         """
         
         try:
-            # Debug log of parameters being sent to database
-            print("Database parameters:")
-            print(f"cust_id: {cust_id} (type: {type(cust_id)})")
-            print(f"title: {title} (type: {type(title)})")
-            print(f"description: {description} (type: {type(description)})")
-            print(f"department_name: {department_name} (type: {type(department_name)})")
-            print(f"subtype: {sub_dept} (type: {type(sub_dept)})")
-            print(f"query_level: {query_complexity} (type: {type(query_complexity)})")
-            print(f"priority_level: {priority_level} (type: {type(priority_level)})")
-            print(f"estimated_time: {estimated_time} (type: {type(estimated_time)})")
-            print(f"categories: {categories_str} (type: {type(categories_str)})")
-            print(f"transcript_bkturl: {transcript_url} (type: {type(transcript_url)})")
-            print(f"status: Active (type: str)")
-            print(f"query_sentiment: {db_sentiment} (type: {type(db_sentiment)})")
-            print(f"date_time: {date_time_str} (type: {type(date_time_str)})")
-            print(f"activity_logs: {activity_logs} (type: {type(activity_logs)})")
-            print(f"additional_details: {additional_details} (type: {type(additional_details)})")
-            
             # Execute the query
             result = execute_query(query, params,return_id=True)
             
