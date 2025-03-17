@@ -1,0 +1,302 @@
+input,output
+"account balance",dbquery
+"transaction history",dbquery
+"credit score",dbquery
+"my account details",dbquery
+"recent transactions",dbquery
+"show my account statement",dbquery
+"interest rate information",dbquery
+"balance inquiry please",dbquery
+"what is my current balance",dbquery
+"retrieve last five transactions",dbquery
+"fetch my recent statement",dbquery
+"get my account info",dbquery
+"what is my transaction history",dbquery
+"show me my credit score",dbquery
+"balance details request",dbquery
+"provide my bank statement",dbquery
+"display my account summary",dbquery
+"account information lookup",dbquery
+"I need my latest transactions",dbquery
+"check my account balance immediately",dbquery
+"can you show transaction details",dbquery
+"what are my interest earnings",dbquery
+"view my monthly statement",dbquery
+"account details and balance",dbquery
+"request my bank balance info",dbquery
+"latest account transactions summary",dbquery
+"my current account details",dbquery
+"download my transaction report",dbquery
+"I want to see my credit report",dbquery
+"get bank statement for last month",dbquery
+"what's my account's balance",dbquery
+"check recent deposits and withdrawals",dbquery
+"detail my account activity",dbquery
+"fetch my savings account summary",dbquery
+"transaction log request",dbquery
+"show detailed transaction history",dbquery
+"I need a full statement",dbquery
+"what is my updated account data",dbquery
+"transfer funds",service
+"pay bill",service
+"activate debit card",service
+"deactivate credit card",service
+"initiate loan request",service
+"change my address",service
+"update mobile number",service
+"set up auto-pay",service
+"report a lost card",service
+"schedule a fund transfer",service
+"cancel scheduled payment",service
+"open new savings account",service
+"apply for credit card",service
+"pay utility bill online",service
+"initiate international transfer",service
+"request checkbook",service
+"order replacement card",service
+"update my email address",service
+"change contact number",service
+"block my debit card immediately",service
+"file a fraud report",service
+"schedule bill payment for rent",service
+"transfer money to savings account",service
+"set up standing instruction",service
+"apply for personal loan",service
+"reorder checkbook please",service
+"change my bank branch",service
+"upgrade to premium account",service
+"initiate wire transfer now",service
+"cancel my scheduled transfer",service
+"enroll in mobile banking",service
+"activate my new card",service
+"deactivate lost credit card",service
+"reset my online banking password",service
+"request for cheque book",service
+"update account contact details",service
+"pay credit card bill",service
+"initiate fund transfer request",service
+"transfers page",page_routing
+"open profile",page_routing
+"go to investments",page_routing
+"beneficiary management section",page_routing
+"navigate to payments tab",page_routing
+"show me the loans page",page_routing
+"open account summary page",page_routing
+"where is the offers section",page_routing
+"take me to support",page_routing
+"access transaction history page",page_routing
+"show transfers tab",page_routing
+"navigate to account details",page_routing
+"open the statement page",page_routing
+"go to fund transfer screen",page_routing
+"redirect to loan application",page_routing
+"show me my dashboard",page_routing
+"move to credit card section",page_routing
+"open settings page",page_routing
+"navigate to help center",page_routing
+"take me to mobile banking",page_routing
+"access bill payment section",page_routing
+"go to branch locator",page_routing
+"show customer support page",page_routing
+"open investment options",page_routing
+"find rewards section",page_routing
+"redirect to account overview",page_routing
+"go to card services",page_routing
+"access statements and history",page_routing
+"take me to the FAQ page",page_routing
+"switch to profile settings",page_routing
+"open recent transactions tab",page_routing
+"navigate to rewards dashboard",page_routing
+"show me the investments section",page_routing
+"go to contact details",page_routing
+"open loan details page",page_routing
+"redirect to update information",page_routing
+"take me to account settings page",page_routing
+"hi there",general
+"good morning",general
+"bank operating hours",general
+"what are your hours",general
+"tell me about your services",general
+"can I get bank information",general
+"what is your customer service number",general
+"greetings from a new customer",general
+"do you offer mobile banking",general
+"where is your nearest branch",general
+"what are your interest rates",general
+"is your bank open today",general
+"tell me about new offers",general
+"any current promotions available",general
+"what products do you offer",general
+"how can I contact support",general
+"bank loan interest details",general
+"I need help with your app",general
+"what is your refund policy",general
+"thank you for the information",general
+"how secure is online banking",general
+"I like your mobile app",general
+"can you explain account fees",general
+"what is your privacy policy",general
+"where can I get a brochure",general
+"tell me more about savings plans",general
+"can I visit your branch",general
+"are there any hidden charges",general
+"what time does the bank open",general
+"can you tell me about mortgage rates",general
+"what banking options are available",general
+"is online chat available",general
+"how does interest accumulate",general
+"good evening, need some info",general
+"where can I find loan rates",general
+"can you assist me with banking tips",general
+"what are the benefits of premium accounts",general
+input,output
+"I would like to review my complete account balance along with all recent deposits and withdrawals to understand my spending patterns better.",dbquery
+"Please provide me with a detailed report of my transaction history including all online purchases and ATM withdrawals from my savings account.",dbquery
+"Can you retrieve my account details such as credit score, account number, and recent activity so I can verify my personal data accurately.",dbquery
+"I need a complete overview of my bank account statement that includes all transactions, fees, and interest earnings from my checking account.",dbquery
+"Kindly fetch my monthly transaction details including any direct debits and automatic payments so I can monitor my expenses effectively.",dbquery
+"Please show me the complete history of all transactions made on my account, including both deposits and online transfers, for the last six months.",dbquery
+"I would appreciate it if you could provide my latest account summary, detailing my balance, recent payments, and any pending transactions.",dbquery
+"Retrieve my account details, including transaction records and current balance, so I can verify the accuracy of my financial information.",dbquery
+"I need a complete listing of all my financial transactions along with a summary of my monthly expenditures for proper budget planning.",dbquery
+"Can you generate a detailed report of my account activities, including any fees, interest earned, and recurring deposits made in the last quarter.",dbquery
+"I would like to check if there are any discrepancies in my account details, including incorrect transactions or unauthorized charges recorded.",dbquery
+"Please provide a summary of my bank account activities, including any international transfers, foreign currency exchanges, and transaction fees applied.",dbquery
+"Can you list all recent transactions on my checking account along with details of deposits, withdrawals, and fees charged by the bank?",dbquery
+"I require a detailed overview of my personal account history including every credit, debit, and possible adjustments made over the past year.",dbquery
+"Fetch my account transaction history that includes payments made at branch counters, online transfers, and any ATM withdrawals recorded recently.",dbquery
+"I need to access my detailed account records, including all transaction logs, branch counter activities, and recent payment authorizations for verification.",dbquery
+"Provide a full audit of my banking transactions from the last six months, covering both online payments and branch-based activities.",dbquery
+"I would like to see the history of all deposits made to my account, including recurring deposits, direct debits, and cheque clearances.",dbquery
+"Can you display my account information with a complete breakdown of fees, interest payments, and any recent updates to my profile data.",dbquery
+"I need a consolidated view of all my account transactions that covers both online banking and branch services like FD applications and renewals.",dbquery
+"Please provide the latest update on my savings account details, including any discrepancies in recent transactions or branch modifications.",dbquery
+"I would like to have a detailed statement of all my financial operations, including transfers, deposits, and any charges applied over the recent period.",dbquery
+"Can you extract my complete bank statement for the last three months, including every transaction made at both online and branch platforms.",dbquery
+"I am looking for an overview of my account activity, detailing the frequency of deposits, withdrawals, and any unusual transactions flagged by the system.",dbquery
+"Fetch my detailed transaction log including both successful and failed transactions, along with any associated fees and time stamps.",dbquery
+"I need a comprehensive report of my banking activities, especially any recent online fund transfers and branch counter withdrawals, for verification.",dbquery
+"Can you show me a breakdown of my account transactions, including information on fees, interest, and any branch-related activities such as FD renewals.",dbquery
+"I would like to receive a summary report of all my account transactions with detailed information about debit and credit operations in the last month.",dbquery
+"Please compile all of my account data into a single detailed report that includes my savings, checking, and any linked investment accounts.",dbquery
+"I would appreciate it if you could provide the latest details of my account status, highlighting any discrepancies or unusual patterns in my spending.",dbquery
+"Can you fetch the complete record of my financial transactions, including details about ATM withdrawals, branch counter deposits, and recurring payments.",dbquery
+"I need to access a comprehensive log of my account transactions that covers all online transfers, FD maturities, and any direct debit authorizations.",dbquery
+"Please provide a detailed account summary that includes every recent transaction, interest accrual, and branch service fee applied to my account.",dbquery
+"I would like to check my complete transaction history to see if there are any unexpected charges or discrepancies in the recorded payments.",dbquery
+"Fetch my account transaction details with all records of withdrawals, deposits, branch transactions, and any associated service fees applied during last month.",dbquery
+"I require a comprehensive view of my banking transactions, including online transfers, in-branch deposits, and any fee adjustments made over recent weeks.",dbquery
+"Can you provide the full history of my credit transactions, including any loan disbursements, repayments, and credit interest calculations for my account.",dbquery
+"I need to obtain all my account records that include a summary of deposits, withdrawals, fees, and any notifications related to branch operations or FD renewals.",dbquery
+"Please extract a detailed record of all my financial activities that includes both in-person branch transactions and all online banking transfers over the past three months.",dbquery
+"I would appreciate receiving my detailed transaction history that includes every deposit, withdrawal, fee, and any branch service interactions from the past quarter.",dbquery
+"Please initiate an immediate fund transfer of $2500 from my checking account to my savings account with the highest possible priority and confirmation.",service
+"I need to schedule a bill payment for my electricity and water bills to be deducted automatically from my account at the earliest possible time.",service
+"Kindly activate my debit card immediately as I seem to be having issues using it at various payment terminals across multiple outlets.",service
+"Please deactivate my credit card immediately since it has been reported lost and I require a replacement as soon as possible.",service
+"I want to request a personal loan of $5000 to be processed within the next two business days, with all necessary documents sent to my email.",service
+"Please update my registered mobile number to the new one provided, and ensure that all my notifications are sent to this updated number.",service
+"I need to set up an automatic recurring payment for my monthly utility bills to avoid any late fees or service interruptions in the future.",service
+"Kindly arrange for a replacement debit card to be dispatched to my registered address as my current card is damaged and unusable.",service
+"I request you to update my address details in your records as I have recently moved to a new residence and require verification.",service
+"Please initiate an international fund transfer to my account in Singapore, ensuring that all currency conversion rates are applied accurately.",service
+"I need to block my debit card immediately due to suspected fraudulent activities and request a new card to be issued promptly.",service
+"Please set up a recurring payment for my monthly credit card bill, ensuring that the deduction is made from my primary account.",service
+"Kindly process my request to activate a new fixed deposit account with an initial deposit amount, and send me the confirmation details.",service
+"I would like to request a loan application form to be sent to my email address along with the necessary eligibility criteria for approval.",service
+"Please activate my online banking service as I have recently updated my password and need to regain full access to my account features.",service
+"I need you to process a cheque request for my account, including sending a new cheque book to my registered postal address immediately.",service
+"Please initiate the process for a wire transfer to my beneficiary account overseas, ensuring all international compliance checks are met.",service
+"I would like to cancel a scheduled fund transfer that I set up last week due to an error in the transaction amount and timing.",service
+"Please process my application for a new credit card with increased spending limit and ensure that all eligibility criteria are thoroughly checked.",service
+"I request the immediate cancellation of my scheduled bill payment for the upcoming month because of unexpected financial changes.",service
+"Please arrange for an emergency loan facility and process the required documentation as soon as possible to cover my urgent expenses.",service
+"I need you to initiate the process of opening a fixed deposit account with a substantial initial deposit to earn higher interest rates.",service
+"Please assist me in setting up a direct debit for my utility bills by linking it with my primary account for automatic monthly deductions.",service
+"I require immediate assistance to process a fund transfer request through your mobile banking platform to ensure timely payment of my bills.",service
+"Please activate my credit card for international transactions and set the spending limit to the recommended threshold as per my profile.",service
+"I want to update my banking preferences by switching to a higher-tier service package and enabling additional security features for my account.",service
+"Kindly process my request for an immediate card reissuance as my current card has been damaged and is no longer functional.",service
+"Please expedite the wire transfer process for my recent transaction and confirm once the funds have been successfully transferred to the beneficiary.",service
+"I need to schedule a meeting with a branch manager to discuss my loan options and inquire about the possibility of an early FD conversion.",service
+"Please arrange for my bank statement to be delivered via email along with any necessary authentication steps for secure access to my records.",service
+"I require assistance in activating a mobile wallet linked to my primary account and ensuring that it supports QR code payments efficiently.",service
+"Kindly process my online request to update my email address and register it as the primary contact for all banking communications.",service
+"Please facilitate the scheduling of an appointment with a financial advisor to discuss investment options and long-term savings strategies.",service
+"I request the immediate reactivation of my online banking account after a temporary suspension due to multiple unsuccessful login attempts.",service
+"Please update my personal details by adding my new work email and adjusting my contact information in your banking records promptly.",service
+"I would like to request a limit increase on my debit card and set spending alerts for any transactions exceeding a preset amount automatically.",service
+"Kindly arrange for my cheque book to be reissued and mailed to my updated address as I have exhausted all the available cheque leaves.",service
+"Please initiate the online process for converting my savings account into a premium account with additional benefits and lower transaction fees.",service
+"I need to schedule an appointment with a bank officer to inquire about setting up a recurring fixed deposit and related interest rates.",service
+"Please update my banking profile by linking my social security number and verifying my contact details to ensure seamless service delivery.",service
+"I need to quickly navigate to the account overview page and then proceed to the funds transfer section for further actions on my account.",page_routing
+"Please redirect me to the detailed transaction history page where I can review all my past banking activities and financial records.",page_routing
+"I would like to open the investments tab on my mobile banking app to check the performance of my mutual funds and stocks portfolio.",page_routing
+"Kindly take me to the branch locator page so I can find the nearest bank branch with available FD services and customer support.",page_routing
+"Please show me the navigation menu that includes options for transfers, deposits, FD inquiries, loan applications, and other services available.",page_routing
+"I need to access the profile settings page immediately to update my personal details and change my security preferences for better account protection.",page_routing
+"Please take me to the funds transfer page where I can review my beneficiary details and initiate a new money transfer securely.",page_routing
+"I need assistance navigating to the loan application section on the website so I can submit my request for a personal loan immediately.",page_routing
+"Could you please direct me to the contact support page so that I can get help with technical issues related to my online banking service.",page_routing
+"I would like to navigate to the recent transactions page to quickly review all my bank activities and verify each record for accuracy.",page_routing
+"Please direct me to the online investments dashboard where I can monitor my FD, mutual funds, and other investment vehicles in real time.",page_routing
+"I need to access the help center page immediately as I am facing issues with navigating the different sections of the app.",page_routing
+"Kindly navigate me to the rewards section on the banking app so I can view and redeem my accumulated loyalty points.",page_routing
+"I would like to access the online banking dashboard where I can see a summary of my account balances, FD status, and recent transactions.",page_routing
+"Please take me to the branch services page where I can find options for FD inquiries, branch appointments, and other related tasks.",page_routing
+"I need to navigate to the mobile deposit page on the banking app so that I can deposit my check without visiting a branch.",page_routing
+"Please redirect me to the account settings page where I can modify my login credentials, update contact information, and change notification preferences.",page_routing
+"I would like to access the FD maturity page on the app to check the status of my fixed deposits and the upcoming renewal dates.",page_routing
+"Please navigate me to the loan services page where I can explore different loan options and review the eligibility criteria in detail.",page_routing
+"I need to access the account summary page that provides an overall view of my banking activities including transfers, deposits, and FD details.",page_routing
+"Please redirect me to the customer support chat page so that I can quickly get answers to my technical queries regarding my account.",page_routing
+"I would like to view the transaction disputes page on the website to see if there are any issues with my recent transactions that need attention.",page_routing
+"Please take me to the scheduled appointments page where I can review all my past and upcoming appointments with bank officials.",page_routing
+"I need to navigate to the recent notifications page to check for any alerts related to my account activities, security updates, or FD renewals.",page_routing
+"Please redirect me to the offers and promotions page so that I can explore the latest banking products and special FD rates available.",page_routing
+"I would like to open the funds deposit page to verify my recent deposit transactions and to check for any discrepancies in the amounts received.",page_routing
+"Please take me to the branch locator section on the mobile app so I can find directions to the nearest branch with extended FD services.",page_routing
+"I need to access the online bill payment page to review my scheduled payments, view pending transactions, and check for any processing errors.",page_routing
+"Please navigate me to the account preferences page where I can customize my notification settings, language options, and security alerts easily.",page_routing
+"I would like to switch to the transaction summary view on my online dashboard to get a comprehensive look at my daily banking activities.",page_routing
+"Please take me to the security settings page where I can review and update my two-factor authentication and other security preferences.",page_routing
+"I need to navigate to the dispute resolution section on the website to check the status of my submitted transaction dispute claims.",page_routing
+"Please redirect me to the account linking page so I can add my additional bank accounts for consolidated financial management in one view.",page_routing
+"I would like to access the loan application tracking page on your website so I can monitor the progress of my current loan request efficiently.",page_routing
+"Please navigate me to the branch services directory on the app so I can view all available services including FD options and branch timings.",page_routing
+"I need to access the profile verification page to update my KYC documents and ensure my account information is accurate and secure.",page_routing
+"Please direct me to the detailed loan calculator page where I can simulate different scenarios for loan repayments and interest accrual.",page_routing
+"I need to navigate to the customer feedback page on the banking website so that I can submit my experience and suggestions regarding the service.",page_routing
+"Please redirect me to the account activity page where I can view all recent transactions and see detailed information about each operation.",page_routing
+"I would like to access the mobile app's quick access menu to find shortcuts for transfers, deposits, FD applications, and other banking services conveniently.",page_routing
+"I just wanted to know the bank operating hours and if there are any changes in FD interest rates or branch timings for the holiday season.",general
+"Can you provide some information about the bank's history and its latest achievements in improving customer service and digital banking solutions?",general
+"I am curious about the types of savings plans available and whether the bank offers any special FD schemes for long-term investments.",general
+"Could you tell me more about the new features in your mobile app and any upcoming updates that might improve the overall user experience?",general
+"I was wondering if the bank provides any financial advisory services or online tools to help customers make better investment decisions.",general
+"What are the benefits of being a premium account holder, and do you offer any exclusive FD rates or rewards for such accounts?",general
+"I am interested in learning more about your digital banking security measures and how you ensure that customer data remains protected at all times.",general
+"Could you please share details about the bank's latest community initiatives and any partnerships that promote financial literacy among customers?",general
+"I am looking for general information about the bank's policies regarding privacy, security, and how they handle FD investment products.",general
+"Can you tell me if the bank is planning to open new branches in my area and what services will be available at these new locations?",general
+"I am interested in finding out more about your online tutorials and webinars that explain various financial products, including FD options.",general
+"What kind of customer rewards programs does the bank offer, and are there any special incentives for customers investing in FD schemes?",general
+"I would like to know if there are any upcoming changes in the bank's digital interface or any plans to introduce new features in the mobile app.",general
+"Can you provide more details on the bank's customer support availability and how they handle inquiries during peak hours and weekends?",general
+"I am curious to know what innovative digital services the bank is planning to launch next year and how it will impact FD offerings.",general
+"Could you tell me about the bank's initiatives to improve sustainability and community support, and if there are any special programs for long-term FD customers.",general
+"I would like to learn more about the various investment products offered by the bank, including details on FD rates and recurring deposit plans.",general
+"What are the current market trends in banking services and how is the bank leveraging technology to enhance customer experience across all platforms?",general
+"I am exploring options for better financial management and want to understand how your digital tools compare to traditional branch services and FD options.",general
+"Can you explain the differences between the various account types offered and what advantages they provide in terms of digital access and branch benefits?",general
+"I would like to inquire about the bank's approach to customer data privacy and the measures taken to secure personal information across digital platforms.",general
+"Can you provide an overview of your online banking platform's user interface and any plans for redesigning it to enhance accessibility and ease of use?",general
+"I am curious about how the bank is planning to integrate artificial intelligence into its services and if this will affect FD interest calculations.",general
+"Could you tell me about the customer support services available during non-business hours and if there are any dedicated lines for urgent FD queries?",general
+"I would like to know more about the bank’s community outreach programs and if there are any incentives for customers who open new FD accounts.",general
+"Can you share details on the bank's environmental sustainability efforts and whether any special FD investment options are linked to green initiatives?",general
+"I am interested in knowing if there are any financial literacy programs available to customers and how these programs integrate FD product education.",general
+"Could you provide some insights into the bank's digital innovation strategy and if there are any planned upgrades to FD processing systems?",general
+"I was wondering if you could explain how the bank manages risk in its FD portfolios and what measures are in place to secure investor funds.",general
+"I would like to learn more about the bank's overall service philosophy and how it integrates both digital and branch experiences for customer satisfaction.",general

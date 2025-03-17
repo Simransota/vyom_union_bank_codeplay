@@ -1,0 +1,13 @@
+employee_id,employee_name,employee_email,employee_number,branch_id,dept_name
+1001,Alice Smith,alice.smith@example.com,9819008772,2301,"Loans Department"
+1002,Bob Johnson,bob.johnson@example.com,9819001234,2301,"Loans Department"
+1003,Carol Davis,carol.davis@example.com,9819005678,2302,"General Banking"
+1004,David Lee,david.lee@example.com,9819002345,2303,"Forex"
+1005,Eva Brown,eva.brown@example.com,9819006789,2304,"Forex"
+1006,Frank Wilson,frank.wilson@example.com,9819003456,2305,"General Banking"
+1007,Grace Miller,grace.miller@example.com,9819007890,2306,"Loans Department"
+1008,Hank Taylor,hank.taylor@example.com,9819004567,2307,"Forex"
+1009,Ivy Anderson,ivy.anderson@example.com,9819008901,2308,"General Banking"
+1010,Jack Martin,jack.martin@example.com,9819005678,2302,"Loans Department"
+1011,Karen White,karen.white@example.com,9819006789,2303,"General Banking"
+1012,Larry King,larry.king@example.com,9819007890,2304,"Forex"

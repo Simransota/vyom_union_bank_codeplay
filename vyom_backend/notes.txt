@@ -1,0 +1,6 @@
+commands to run in 4 terminals in order
+
+uvicorn main:app --reload
+celery -A celery_app worker --loglevel=info -P eventlet
+celery -A celery_app beat --loglevel=info
+celery -A celery_app flower --port=5555

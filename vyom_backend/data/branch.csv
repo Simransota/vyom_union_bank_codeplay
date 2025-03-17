@@ -1,0 +1,9 @@
+branch_id,branch_city,branch_address,branch_state,branch_loc,employee_cnt
+2301,Bengaluru,"123 Main St","Karnataka","POINT(77.5946 12.9716)",25
+2302,Bengaluru,"456 MG Road","Karnataka","POINT(77.6000 12.9800)",30
+2303,Mumbai,"789 Linking Rd","Maharashtra","POINT(72.8777 19.0760)",20
+2304,Mumbai,"321 Marine Drive","Maharashtra","POINT(72.8826 19.0450)",22
+2305,Delhi,"654 Connaught Place","Delhi","POINT(77.2334 28.6320)",18
+2306,Delhi,"987 Saket Rd","Delhi","POINT(77.2100 28.5450)",16
+2307,Chennai,"159 T.Nagar","Tamil Nadu","POINT(80.2707 13.0827)",28
+2308,Chennai,"753 Marina Beach Rd","Tamil Nadu","POINT(80.2750 13.0800)",26
