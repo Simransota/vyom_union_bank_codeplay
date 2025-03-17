@@ -80,14 +80,14 @@ def generate_ticket(username: str, query: str, service: str):
     Sends user request details to an external ticketing system and retrieves the ticket number.
     """
     payload = {
-        "query": query,
-        "user_id": username
+        "user_id": username,
+        "query": query
     }
     try:
         response = requests.post(TICKET_API_URL, json=payload)
         response_data = response.json()
         print(f"Ticket System Response: {response_data}")
-        return [response_data.get("ticket_number", "N/A") , service]
+        return [response_data.get("query_id", "N/A") , service]
     except Exception as e:
         print(f"Error contacting ticket system: {e}")
         return "N/A"
