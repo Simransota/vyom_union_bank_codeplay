@@ -7,7 +7,7 @@ import wave
 app = FastAPI()
 
 @app.post("/process_audio/")
-async def process_audio(audio: UploadFile = File(...)):
+async def process_audio(target_lang: str,audio: UploadFile = File(...)):
     """Handles audio input, processes it using AI, and returns generated speech."""
     
     # Save received audio file
@@ -27,10 +27,10 @@ async def process_audio(audio: UploadFile = File(...)):
     print(f"🤖 AI Response: {ai_response}")
 
     # Translate AI response if needed
-    translated_response = tts_with_llm.translate_text(ai_response, "en-IN", tts_with_llm.target_lang)
+    translated_response = tts_with_llm.translate_text(ai_response, "en-IN", target_lang)
 
     # Convert AI response to speech
-    tts_audio = tts_with_llm.text_to_speech(translated_response, tts_with_llm.target_lang)
+    tts_audio = tts_with_llm.text_to_speech(translated_response, target_lang)
     if not tts_audio:
         return {"error": "Text-to-speech failed"}
 
