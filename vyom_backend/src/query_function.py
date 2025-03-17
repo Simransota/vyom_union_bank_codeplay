@@ -192,7 +192,7 @@ def classify_banking_query(query: str) -> Dict[str, Any]:
         print(f"Raw response: {response}")
     return result
 
-def store_query_as_file(query: str) -> Dict[str, Any]:
+def store_query_as_file(query: str) -> str:
     """
     Store a user query as a text file and upload to Supabase storage.
     
@@ -225,20 +225,11 @@ def store_query_as_file(query: str) -> Dict[str, Any]:
             # If URL contains spaces, replace them with %20 for proper URL encoding
             if url and ' ' in url:
                 url = url.replace(' ', '%20')
-            return {
-                "success": True,
-                "url": url
-            }
+            return url
         else:
-            return {
-                "success": False,
-                "error": response.get("message", "Unknown error occurred during upload")
-            }
+            return "error"
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return "error"
 
 def predict_resolution_time(priority_score, dept, sub_dept, service_level):
     """
@@ -274,17 +265,7 @@ def predict_resolution_time(priority_score, dept, sub_dept, service_level):
             "Foreign Investments & NRI Banking": {1: 25, 2: 50, 3: 75}
         }
     }
-    
-    # Error handling for invalid inputs
-    if dept not in base_times:
-        return "00:30:00"  # Default 30 minutes for unknown department
-    
-    if sub_dept not in base_times[dept]:
-        return "00:30:00"  # Default 30 minutes for unknown sub-department
-    
-    if service_level not in base_times[dept][sub_dept]:
-        return "00:30:00"  # Default 30 minutes for invalid service level
-    
+        
     # Retrieve the base resolution time
     base_time = base_times[dept][sub_dept][service_level]
     
@@ -312,7 +293,6 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
     Args:
         query_text (str): The customer's query text
         cust_id (str): Customer UUID from database
-        
     Returns:
         Dict containing the processing result and database operation status
     """
@@ -331,7 +311,7 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             title = description_data.get("title", "Untitled Query")
             description = description_data.get("description", query_text[:100])
             query_complexity = int(description_data.get("query complexity", 1))
-            query_sentiment = description_data.get("sentiment", "NEUTRAL")
+            query_sentiment = description_data.get("sentiment")
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             print(f"Error parsing description result: {e}")
             title = "Untitled Query"
@@ -341,22 +321,22 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             
         # Step 2: Classify the query (department, sub-department, categories)
         classification = classify_banking_query(query_text)
-        department_name = classification.get("main_branch", "General Banking")
+        department_name = classification.get("main_branch")
         
         # Make sure sub_branches and categories are lists (not sets)
         sub_branches = list(classification.get("sub_branches", []))
         categories = list(classification.get("categories", []))
         
         # Format subdepartments as comma-separated string if more than one
-        sub_dept = ", ".join(sub_branches) if sub_branches else "General Inquiry"
+        sub_dept = ", ".join(sub_branches)
         
         # Format categories as comma-separated string
         categories_str = ", ".join(categories) if categories else ""
         
         # Step 3: Store the query text and get URL
         storage_result = store_query_as_file(query_text)
-        transcript_url = storage_result.get("url", "")
-        
+        transcript_url = storage_result
+
         # Step 4: Calculate estimated resolution time
         # Set priority based on complexity and sentiment
         priority_level = min(10, max(1, 11 - query_complexity * 3))
@@ -367,7 +347,7 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             
         # Calculate resolution time in minutes
         # For resolution time calculation, use the first subdepartment if multiple exist
-        calculation_sub_dept = sub_branches[0] if sub_branches else "General Inquiry"
+        calculation_sub_dept = sub_branches[0]
         
         # Handle case where sub_dept is not in base_times
         try:
@@ -380,7 +360,6 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
         except Exception as rt_error:
             print(f"Error calculating resolution time: {rt_error}")
             # Fallback to a default resolution time
-            estimated_time = "00:30:00"
         
         # Create activity logs as JSON string
         activity_logs = json.dumps([{
@@ -408,7 +387,7 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             "CURIOUS": "Neutral",
             "WORRIED": "Negative"
         }
-        db_sentiment = sentiment_mapping.get(query_sentiment, "Neutral")
+        db_sentiment = query_sentiment
         
         # Set parameters for SQL query with correct types
         params = (
@@ -472,35 +451,14 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             print(f"additional_details: {additional_details} (type: {type(additional_details)})")
             
             # Execute the query
-            response = execute_query(query, params)
+            result = execute_query(query, params,return_id=True)
             
             # Extract query_id from response
-            data = response.data
-            print("Database response:", data)
-            query_id = data[0][0] if data and len(data) > 0 else None
-            
+            query_id = result
             return {
                 "success": True,
-                "message": "Query processed and saved successfully",
                 "query_id": query_id,
-                "query_data": {
-                    "cust_id": cust_id,
-                    "title": title,
-                    "description": description,
-                    "department_name": department_name,
-                    "subtype": sub_dept,
-                    "categories": categories_str,
-                    "query_level": query_complexity,
-                    "priority_level": priority_level,
-                    "estimated_time": estimated_time,
-                    "transcript_bkturl": transcript_url,
-                    "query_sentiment": db_sentiment,
-                    "status": "Active",
-                    "date_time": date_time_str
-                },
-                "status_code": 201
             }
-            
         except Exception as db_error:
             print(f"Database error: {str(db_error)}")
             return {
