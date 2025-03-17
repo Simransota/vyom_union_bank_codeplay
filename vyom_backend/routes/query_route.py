@@ -4,6 +4,12 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from src.utils import execute_query
 from src.query_function import process_query_and_save
+from pydantic import BaseModel
+
+class QueryRequest(BaseModel):
+    query: str
+    user_id: str
+
 router = APIRouter(
     prefix="/query",
     tags=["queries"],
@@ -39,9 +45,18 @@ async def send_query(name: str, priority: int) -> Dict[str, Any]:
         }
 
 @router.post('/process/', response_model=QueryResponse)
-async def process_query(query: str, user_id: str) -> Dict[str, Any]:
+async def process_query(request_data: QueryRequest) -> Dict[str, Any]:
     """Processes a query and saves it to the database"""
     try:
+        query = request_data.get("query")
+        user_id = request_data.get("user_id")
+        
+        if not query or not user_id:
+            return {
+                "status": "error",
+                "message": "Missing required parameters: query and user_id"
+            }
+            
         result = process_query_and_save(query, user_id)
         
         # Check if result contains a valid query_id
