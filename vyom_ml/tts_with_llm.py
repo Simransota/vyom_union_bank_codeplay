@@ -5,8 +5,7 @@
 # translate_text and text_to_speech functions
 # 5) The llm function to be updated to recieve language code as input
 # 6) The main code to be updated to pass the language code to the llm function
-# 7) to book a request in my backend through voice
-# 8) convert into fastapi app
+
 
 
 import pyaudio
