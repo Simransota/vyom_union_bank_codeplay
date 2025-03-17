@@ -16,19 +16,24 @@ def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
         int: Predicted Priority Score (rounded up)
     """
     
-    model_filename = "xgboost_priority_model.pkl"
+    model_filename = "vyom_ml/xgboost_priority_model.pkl"
     # Load the trained model
     with open(model_filename, "rb") as file:
         loaded_model = pickle.load(file)
 
     # Create DataFrame from manual input
     input_data = pd.DataFrame([[bank_balance, age, bank_joining_year, asset_value]],
+<<<<<<< HEAD
                             columns=X.columns)  # Ensure feature names match
+=======
+                            columns=['Bank Balance (₹)', 'Age', 'Bank Joining Year', 'Asset Value (₹)'])  # Ensure feature names match
+
+>>>>>>> 1ff5d10e94c6717171bdbba808688df582e262e2
     # Make prediction
     predicted_score = loaded_model.predict(input_data)[0]
     # Round up to the nearest whole number
     return math.ceil(predicted_score)
 
 # # Example manual input
-# example_prediction = predict_priority_score(500000, 30, 2015, 1000000)
-# print(f"Predicted Priority Score: {example_prediction}")
+example_prediction = predict_priority_score(50000, 68, 2024, 1000)
+print(f"Predicted Priority Score: {example_prediction}")
