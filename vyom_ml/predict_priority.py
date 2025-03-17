@@ -23,12 +23,8 @@ def predict_priority_score(bank_balance, age, bank_joining_year, asset_value):
 
     # Create DataFrame from manual input
     input_data = pd.DataFrame([[bank_balance, age, bank_joining_year, asset_value]],
-<<<<<<< HEAD
-                            columns=X.columns)  # Ensure feature names match
-=======
-                            columns=['Bank Balance (₹)', 'Age', 'Bank Joining Year', 'Asset Value (₹)'])  # Ensure feature names match
+                            columns=['Bank Balance (₹)', 'Age', 'Bank Joining Year', 'Asset Value (₹)'])  # Ensure feature names match # Ensure feature names match
 
->>>>>>> 1ff5d10e94c6717171bdbba808688df582e262e2
     # Make prediction
     predicted_score = loaded_model.predict(input_data)[0]
     # Round up to the nearest whole number
