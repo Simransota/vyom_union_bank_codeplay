@@ -58,7 +58,6 @@ banking_map = {
 }
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain import LLMChain
 from langchain_core.prompts import PromptTemplate
 import json
 from src.utils import execute_query
@@ -97,8 +96,8 @@ return in json format without /n
 
 prompt = PromptTemplate(template=template, input_variables=["query"])
 
-# Create an LLMChain
-llm_chain = LLMChain(prompt=prompt, llm=llm)
+# Replace deprecated LLMChain with RunnableSequence
+query_chain = prompt | llm
 
 def generate_query_description(user_query):
     """
@@ -110,8 +109,12 @@ def generate_query_description(user_query):
     Returns:
         str: JSON formatted description of the query
     """
-    # Create an LLMChain with the user query
-    return llm_chain.run(user_query)
+    # Replace llm_chain.run with query_chain.invoke and extract content
+    response = query_chain.invoke({"query": user_query})
+    # For ChatGoogleGenerativeAI, we need to extract the content from the response
+    if hasattr(response, 'content'):
+        return response.content
+    return response
 
 def classify_banking_query(query: str) -> Dict[str, Any]:
     """
