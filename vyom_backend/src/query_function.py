@@ -390,7 +390,8 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             "CURIOUS": "Neutral",
             "WORRIED": "Negative"
         }
-        db_sentiment = query_sentiment
+        
+        db_sentiment = sentiment_mapping.get(query_sentiment, "Neutral")
         
         # Set parameters for SQL query with correct types
         params = (
@@ -455,9 +456,13 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             
             # Execute the query
             result = execute_query(query, params,return_id=True)
-            
-            # Extract query_id from response
-            query_id = result
+            if isinstance(result, int):
+                query_id = result
+            else:
+                # Log this issue
+                print(f"Warning: execute_query did not return an integer ID: {result}")
+                query_id = None
+
             return {
                 "success": True,
                 "query_id": query_id,

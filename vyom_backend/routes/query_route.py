@@ -43,10 +43,19 @@ async def process_query(query: str, user_id: str) -> Dict[str, Any]:
     """Processes a query and saves it to the database"""
     try:
         result = process_query_and_save(query, user_id)
-        # Extract the query_id from the result if it's a dictionary
+        
+        # Check if result contains a valid query_id
+        query_id = result.get("query_id")
+        if query_id is None:
+            # Return error response when no query_id is found
+            return {
+                "status": "error",
+                "message": "Failed to generate query ID"
+            }
+        
         return {
             "status": "success",
-            "query_id": result.get("query_id")
+            "query_id": query_id
         }
     except Exception as e:
         return {
