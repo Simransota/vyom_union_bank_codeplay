@@ -4,14 +4,28 @@ from typing import List, Dict, Any
 from datetime import datetime
 import pytz
 from celery.result import AsyncResult
-from celery_app import send_mail
+# from celery_app import send_mail, send_notification, send_sms
+from celery_app import send_mail,send_sms
 from src.email_send import generate_email, EmailRequest
+# from src.sms_send import send_notification
 
 router = APIRouter(
     prefix="/mail",
     tags=["email"],
     responses={404: {"description": "Not found"}},
 )
+
+class SMSParams(BaseModel):
+    phone_number: str
+    message: str
+    send_datetime: str = None  # Optional for scheduling
+
+class NotificationParams(BaseModel):
+    device_id: str
+    title: str
+    message: str
+    send_datetime: str = None  # Optional for scheduling
+
 
 class MailParams(BaseModel):
     subject: str
@@ -27,7 +41,11 @@ class MailResponse(BaseModel):
     scheduled_time: str = None
     message: str = None
 
-@router.post('/scheduled/', response_model=MailResponse)
+class NotificationParams(BaseModel):
+    device_id: str
+    title: str
+
+@router.post('/scheduled_mail/', response_model=MailResponse)
 async def create_task(params: MailParams) -> Dict[str, Any]:
     """Schedule an email task at a given IST time."""
     try:
@@ -59,7 +77,7 @@ async def create_task(params: MailParams) -> Dict[str, Any]:
             "task_id": None
         }
 
-@router.post('/send/', response_model=MailResponse)
+@router.post('/send_mail/', response_model=MailResponse)
 async def send_mail_now(params: MailParams) -> Dict[str, Any]:
     """Send an email immediately."""
     try:
@@ -110,3 +128,113 @@ async def generate_email_endpoint(request: EmailRequest):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+
+@router.post('/send_sms/', response_model=MailResponse)
+async def send_sms_now(params: SMSParams) -> Dict[str, Any]:
+    """Send an SMS immediately."""
+    try:
+        task = send_sms.delay(params.phone_number, params.message)
+        return {
+            "status": "success",
+            "task_id": task.id
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "task_id": None
+        }
+
+@router.post('/scheduled_sms/', response_model=MailResponse)
+async def schedule_sms(params: SMSParams) -> Dict[str, Any]:
+    """Schedule an SMS task at a given time."""
+    try:
+        if params.send_datetime:
+            datetime_formatted = datetime.strptime(params.send_datetime, "%Y-%m-%dT%H:%M:%S%z")
+            send_datetime_utc = datetime_formatted.astimezone(pytz.utc)
+            
+            # Check if the scheduled time is in the future
+            if send_datetime_utc <= datetime.now(pytz.utc):
+                return {
+                    "status": "error",
+                    "message": "Scheduled time must be in the future",
+                    "task_id": None
+                }
+
+            task = send_sms.apply_async(
+                args=[params.phone_number, params.message],
+                eta=send_datetime_utc
+            )
+            
+            return {
+                "status": "success",
+                "task_id": task.id,
+                "scheduled_time": send_datetime_utc.isoformat()
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "send_datetime is required for scheduling",
+                "task_id": None
+            }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "task_id": None
+        }
+
+# @router.post('/send_notification/', response_model=MailResponse)
+# async def send_notification_now(params: NotificationParams) -> Dict[str, Any]:
+#     """Send a notification immediately."""
+#     try:
+#         task = send_notification.delay(params.device_id, params.title, params.message)
+#         return {
+#             "status": "success",
+#             "task_id": task.id
+#         }
+#     except Exception as e:
+#         return {
+#             "status": "error",
+#             "message": str(e),
+#             "task_id": None
+#         }
+
+# @router.post('/scheduled_notification/', response_model=MailResponse)
+# async def schedule_notification(params: NotificationParams) -> Dict[str, Any]:
+#     """Schedule a notification task at a given time."""
+#     try:
+#         if params.send_datetime:
+#             datetime_formatted = datetime.strptime(params.send_datetime, "%Y-%m-%dT%H:%M:%S%z")
+#             send_datetime_utc = datetime_formatted.astimezone(pytz.utc)
+            
+#             # Check if the scheduled time is in the future
+#             if send_datetime_utc <= datetime.now(pytz.utc):
+#                 return {
+#                     "status": "error",
+#                     "message": "Scheduled time must be in the future",
+#                     "task_id": None
+#                 }
+
+#             task = send_notification.apply_async(
+#                 args=[params.device_id, params.title, params.message],
+#                 eta=send_datetime_utc
+#             )
+            
+#             return {
+#                 "status": "success",
+#                 "task_id": task.id,
+#                 "scheduled_time": send_datetime_utc.isoformat()
+#             }
+#         else:
+#             return {
+#                 "status": "error",
+#                 "message": "send_datetime is required for scheduling",
+#                 "task_id": None
+#             }
+#     except Exception as e:
+#         return {
+#             "status": "error",
+#             "message": str(e),
+#             "task_id": None
+#         }

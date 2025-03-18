@@ -13,6 +13,8 @@ import time
 import os
 from celery import Celery
 from src.email_send import send_dynamic_email
+# from src.sms_send import send_notification,send_sms
+from src.sms_send import send_sms
 from typing import List
 from src.config import redis_client
 from src.utils import execute_query
@@ -85,6 +87,32 @@ def apply_aging_to_queue():
         pipe.execute()
         if cursor == 0:
             break
+
+# @celery_app.task
+# def notification_send(title: str, device_id: str):
+#     """Sends an push notification using the provided parameters."""
+#     notify_config = {
+#         "title": title,
+#         "device_id": device_id,
+#     }
+#     response = send_notification(**notify_config)
+
+#     return "success" if response.get('status') == 'success' else "error"
+
+# @celery_app.task
+# def notification_send(title: str, device_id: str):
+#     """Sends an push notification using the provided parameters."""
+#     notify_config = {
+#         "title": title,
+#         "device_id": device_id,
+#     }
+#     response = send_notification(**notify_config)
+
+@celery_app.task
+def sms_send(text: str, phone_number: str):
+    """Sends an SMS using the provided parameters."""
+    response = send_sms(text, phone_number)
+
 
 @celery_app.task(bind=True)
 def process_next_query(self):

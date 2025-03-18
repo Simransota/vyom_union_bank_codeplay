@@ -1,0 +1,29 @@
+{
+    "project_info": {
+      "project_number": "367467653808",
+      "project_id": "vyom-notification",
+      "storage_bucket": "vyom-notification.firebasestorage.app"
+    },
+    "client": [
+      {
+        "client_info": {
+          "mobilesdk_app_id": "1:367467653808:android:8fba1e5d23e29b62046975",
+          "android_client_info": {
+            "package_name": "com.example.vyom"
+          }
+        },
+        "oauth_client": [],
+        "api_key": [
+          {
+            "current_key": "AIzaSyBW19uL_CmEq9-1pQi8q3s3-gw_cmCvxVk"
+          }
+        ],
+        "services": {
+          "appinvite_service": {
+            "other_platform_oauth_client": []
+          }
+        }
+      }
+    ],
+    "configuration_version": "1"
+  }

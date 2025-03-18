@@ -15,7 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from src.utils import is_redis_active
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import redis_client
-from routes import mail_route, ai_route, util_route, query_route, user_route
+from routes import mail_route, ai_route, util_route, query_route, user_route,chats_route
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -52,6 +52,7 @@ app.include_router(query_route.router)
 app.include_router(ai_route.router) 
 app.include_router(util_route.router)
 app.include_router(user_route.router)
+app.include_router(chats_route.router)
 
 # Global exception handler to ensure all responses are JSON
 @app.exception_handler(RequestValidationError)

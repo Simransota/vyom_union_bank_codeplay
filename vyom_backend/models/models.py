@@ -92,9 +92,19 @@ class Chat(BaseModel):
     employee_id: Optional[int] = None
     query_id: Optional[int] = None
     agent_reply: Optional[bool] = None
+    created_at: Optional[datetime] = None
 
 class Document(BaseModel):
     query_id: Optional[int] = None
     document_name: Optional[str] = None
     is_submit: Optional[bool] = None
     doc_url: Optional[str] = None
+    # Make models exportable
+    __all__ = [
+        "Query",
+        "Customer",
+        "Employee",
+        "Message",
+        "Chat",
+        "Document"
+    ]
