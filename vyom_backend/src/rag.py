@@ -14,8 +14,6 @@ import os
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-app = Flask(__name__)
-
 # Directory containing PDFs
 PDF_DIRECTORY = "pdfs"
 
