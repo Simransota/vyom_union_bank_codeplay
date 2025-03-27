@@ -46,13 +46,13 @@ async def classify_bank_query_endpoint(query: str) -> Dict[str, Any]:
             "error": str(e)
         }
 
-# @router.post("/analyze-sentiment/")
-# async def analyze_sentiment_endpoint(text: str):
-#     """
-#     Analyze the sentiment of the given text.
-#     """
-#     try:
-#         result = analyze_sentiment(text)
-#         return JSONResponse(content=result)
-#     except Exception as e:
-#         return JSONResponse(content={"error": str(e)}, status_code=500)
+@router.post("/analyze-sentiment/")
+async def analyze_sentiment_endpoint(text: str):
+    """
+    Analyze the sentiment of the given text.
+    """
+    try:
+        result = analyze_sentiment(text)
+        return JSONResponse(content=result)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)

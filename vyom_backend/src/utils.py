@@ -50,7 +50,7 @@ def is_redis_active(redis_client):
 
 def execute_query(query, params=None, use_cache=False, cache_key=None, cache_expiry=3600, return_id=False):
     """
-    Executes a given SQL query using a connection from the pool.
+    Executes a given SQL query using psycopg connection.
     
     Args:
         query (str): The SQL query to execute.
@@ -62,41 +62,42 @@ def execute_query(query, params=None, use_cache=False, cache_key=None, cache_exp
     
     Returns:
         If return_id is True and it's an INSERT query: The ID of the last inserted row
-        Otherwise: The result of the query as a list of tuples, or None in case of error.
+        Otherwise: The result of the query as a list of dicts, or None in case of error.
     """
+    import json
+    
     if use_cache and not cache_key:
         raise ValueError("cache_key is required when use_cache is True")
+    
     if use_cache:
         cached_result = redis_client.get(cache_key)
         if cached_result:
             try:
-                # Assuming your result is stored as a JSON-encoded string
-                import json
                 return json.loads(cached_result)
             except json.JSONDecodeError:
                 print(f"Error decoding cached result for key: {cache_key}")
                 # Fallback to executing the query and updating the cache
+    
     try:
         conn = get_pg_connection()
         if conn:
             try:
-                with conn.cursor() as cur:
-                    psycopg2.extras.register_composite("kpi_type", conn) # Register composite type
-
-                    cur.execute(query, params)
+                # Create a cursor that returns results as dictionaries
+                with conn.cursor(row_factory=psycopg2.rows.dict_row) as cur:
+                    # Execute the query with parameters if provided
+                    cur.execute(query, params if params else None)
                     
                     # Get last inserted ID if it's an INSERT query and return_id is True
                     last_id = None
                     if return_id and query.strip().upper().startswith('INSERT'):
                         cur.execute("SELECT lastval()")
-                        last_id = cur.fetchone()[0]
+                        last_id = cur.fetchone()["lastval"]
                     
                     # Get result set if query returns data
                     if cur.description:
                         result = cur.fetchall()
                         if use_cache:
                             try:
-                                import json
                                 redis_client.setex(cache_key, cache_expiry, json.dumps(result))
                             except Exception as cache_err:
                                 print(f"Error caching result: {cache_err}")
@@ -113,14 +114,11 @@ def execute_query(query, params=None, use_cache=False, cache_key=None, cache_exp
                 print(f"Error executing query: ❌ {inner_e}")
                 conn.rollback()
                 return None
-
             finally:
                 release_pg_connection(conn)
-
         else:
             print("Failed to retrieve a connection from the pool: ❌")
             return None
-
     except Exception as e:
         print(f"Error initializing connection pool: ❌ {e}")
         return None
