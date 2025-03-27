@@ -1,10 +1,9 @@
 from src.config import get_pg_connection, release_pg_connection  # Import connection pool functions
-from src.config import redis_client
-import psycopg2
-import psycopg2.extras
-from shapely.wkb import loads
+from src.config import get_pg_connection,get_redis,release_pg_connection,init_redis,redis_client,sync_redis_client,get_db_connection
+import json
 import binascii
 import io
+from asyncpg import PostgresError
 from supabase import create_client, Client
 import datetime
 import random
@@ -12,7 +11,8 @@ import os
 from dotenv import load_dotenv
 import asyncpg
 from typing import Any, List, Tuple, Optional, Union
-
+from pydantic import BaseModel, Field
+import psycopg2
 # Load environment variables
 load_dotenv()
 
@@ -38,142 +38,140 @@ def get_lnglat(wkb_hex):
     return (geometry.x, geometry.y)
 
 
-def is_redis_active(redis_client):
+async def is_redis_active():
     """Check if Redis connection is active."""
+    global redis_client
+    if redis_client is None:
+        await init_redis()  # Ensure Redis is initialized
+
     try:
-        if redis_client.ping():
+        if redis_client and await redis_client.ping():
             return "yes"
         return "no"
     except Exception as e:
-        print(f"Redis connection error: {e}")
+        print(f"❌ Redis connection error: {e}")
         return "no"
 
-def execute_query(query, params=None, use_cache=False, cache_key=None, cache_expiry=3600, return_id=False):
-    """
-    Executes a given SQL query using psycopg connection.
-    
-    Args:
-        query (str): The SQL query to execute.
-        params (tuple, optional): Parameters for parameterized queries (default: None).
-        use_cache (bool, optional): Whether to cache the result in Redis (default: False).
-        cache_key (str, optional): The key to use for caching in Redis (required if use_cache is True).
-        cache_expiry (int, optional): Cache expiry time in seconds (default: 3600 seconds).
-        return_id (bool, optional): Whether to return the last inserted ID for INSERT queries (default: False).
-    
-    Returns:
-        If return_id is True and it's an INSERT query: The ID of the last inserted row
-        Otherwise: The result of the query as a list of dicts, or None in case of error.
-    """
-    import json
-    
-    if use_cache and not cache_key:
-        raise ValueError("cache_key is required when use_cache is True")
-    
-    if use_cache:
-        cached_result = redis_client.get(cache_key)
+# Define Pydantic Model for Input Validation
+class QueryRequest(BaseModel):
+    query: str = Field(..., description="The SQL query to execute")
+    params: Optional[Tuple[Any, ...]] = Field(None, description="Query parameters")
+    use_cache: bool = Field(False, description="Whether to use Redis caching")
+    cache_key: Optional[str] = Field(None, description="Key for caching")
+    cache_expiry: int = Field(3600, description="Cache expiry time in seconds")
+    return_id: bool = Field(False, description="Return last inserted ID if an INSERT query")
+
+
+# Async Query Execution Function
+async def execute_query(request: QueryRequest) -> Union[int, List[dict], None]:
+    """Executes an SQL query asynchronously using asyncpg. Supports Redis caching."""
+    conn = await get_pg_connection()
+    if conn is None:
+        print("❌ Could not get a database connection")
+        return None
+
+    try:
+        # ✅ Check Redis cache before executing query
+        if request.use_cache and request.cache_key and redis_client:
+            cached_result = await redis_client.get(request.cache_key)
+            if cached_result:
+                try:
+                    return json.loads(cached_result)
+                except json.JSONDecodeError:
+                    print(f"Error decoding cached result for key: {request.cache_key}")
+
+        params = request.params or ()  # ✅ Ensure params is always a tuple
+        query_upper = request.query.strip().upper()
+
+        if query_upper.startswith("SELECT"):
+            results = await conn.fetch(request.query, *params)
+            result_data = [dict(row) for row in results]
+
+            # ✅ Store the result in cache
+            if request.use_cache and request.cache_key and redis_client:
+                await redis_client.setex(
+                    request.cache_key, request.cache_expiry, json.dumps(result_data)
+                )
+
+            return result_data
+
+        elif "INSERT" in query_upper and request.return_id:
+            last_id = await conn.fetchval(request.query, *params)
+
+            # ✅ Store last inserted ID in cache (optional)
+            if request.use_cache and request.cache_key and redis_client:
+                await redis_client.setex(request.cache_key, request.cache_expiry, json.dumps({"inserted_id": last_id}))
+
+            return last_id
+
+        else:
+            result = await conn.execute(request.query, *params)
+            affected_rows = int(result.split()[-1]) if "INSERT" in query_upper else result
+
+            # ✅ Store affected rows in cache (optional)
+            if request.use_cache and request.cache_key and redis_client:
+                await redis_client.setex(request.cache_key, request.cache_expiry, json.dumps({"affected_rows": affected_rows}))
+
+            return affected_rows
+
+    except PostgresError as pg_err:
+        print(f"Database error: ❌ {pg_err}")
+        return None
+
+    except Exception as e:
+        print(f"Unexpected error: ❌ {e}")
+        return None
+
+    finally:
+        await release_pg_connection(conn)  # ✅ Properly release connection
+
+def execute_query_sync(query: str, params: tuple = (), use_cache: bool = False, cache_key: str = None, cache_expiry: int = 3600):
+    """Executes a SQL query synchronously using psycopg2."""
+    # Check cache first
+    if use_cache and cache_key:
+        cached_result = sync_redis_client.get(cache_key)
         if cached_result:
             try:
                 return json.loads(cached_result)
             except json.JSONDecodeError:
-                print(f"Error decoding cached result for key: {cache_key}")
-                # Fallback to executing the query and updating the cache
-    
-    try:
-        conn = get_pg_connection()
-        if conn:
-            try:
-                # Create a cursor that returns results as dictionaries
-                with conn.cursor(row_factory=psycopg2.rows.dict_row) as cur:
-                    # Execute the query with parameters if provided
-                    cur.execute(query, params if params else None)
-                    
-                    # Get last inserted ID if it's an INSERT query and return_id is True
-                    last_id = None
-                    if return_id and query.strip().upper().startswith('INSERT'):
-                        cur.execute("SELECT lastval()")
-                        last_id = cur.fetchone()["lastval"]
-                    
-                    # Get result set if query returns data
-                    if cur.description:
-                        result = cur.fetchall()
-                        if use_cache:
-                            try:
-                                redis_client.setex(cache_key, cache_expiry, json.dumps(result))
-                            except Exception as cache_err:
-                                print(f"Error caching result: {cache_err}")
-                    else:
-                        result = None
+                print(f"❌ Error decoding cached data for {cache_key}")
 
-                    conn.commit()
-                    
-                    # Return last_id if requested, otherwise return result
-                    if return_id and last_id is not None:
-                        return last_id
-                    return result
-            except Exception as inner_e:
-                print(f"Error executing query: ❌ {inner_e}")
-                conn.rollback()
-                return None
-            finally:
-                release_pg_connection(conn)
-        else:
-            print("Failed to retrieve a connection from the pool: ❌")
-            return None
-    except Exception as e:
-        print(f"Error initializing connection pool: ❌ {e}")
+    conn = get_db_connection()
+    if not conn:
         return None
 
-async def execute_query_async(query: str, params: Optional[Tuple[Any, ...]] = None) -> Union[int, List[dict]]:
-    """
-    Execute a database query asynchronously
-    
-    Parameters:
-        query (str): SQL query to execute
-        params (tuple, optional): Parameters for the SQL query
-    
-    Returns:
-        int or list: The ID of the inserted row (for INSERT operations with RETURNING) 
-                    or a list of results (for SELECT operations)
-    """
-    # Get database connection details from environment variables
-    db_host = os.environ.get("DB_HOST", "localhost")
-    db_port = os.environ.get("DB_PORT", "5432")
-    db_name = os.environ.get("DB_NAME", "postgres")
-    db_user = os.environ.get("DB_USER", "postgres")
-    db_password = os.environ.get("DB_PASSWORD", "postgres")
-    
-    conn = None
     try:
-        # Connect to the database
-        conn = await asyncpg.connect(
-            host=db_host,
-            port=db_port,
-            database=db_name,
-            user=db_user,
-            password=db_password
-        )
-        
-        if query.strip().upper().startswith("SELECT"):
-            # For SELECT queries, return all results
-            results = await conn.fetch(query, *params) if params else await conn.fetch(query)
-            return [dict(row) for row in results]
-        else:
-            # For INSERT/UPDATE/DELETE queries, return the ID or affected row count
-            if "RETURNING" in query.upper():
-                result = await conn.fetchval(query, *params) if params else await conn.fetchval(query)
-                return result
+        with conn.cursor() as cur:
+            cur.execute(query, params)
+            
+            # Fetch results if it's a SELECT query
+            if query.strip().upper().startswith("SELECT"):
+                columns = [desc[0] for desc in cur.description]
+                results = [dict(zip(columns, row)) for row in cur.fetchall()]
+                
+                # Cache the result
+                if use_cache and cache_key:
+                    sync_redis_client.setex(cache_key, cache_expiry, json.dumps(results))
+
+                return results
+
+            # Return last inserted ID for INSERT
+            elif query.strip().upper().startswith("INSERT"):
+                conn.commit()
+                return cur.fetchone()[0] if cur.description else None
+
+            # Return affected row count for UPDATE/DELETE
             else:
-                result = await conn.execute(query, *params) if params else await conn.execute(query)
-                return int(result.split()[-1]) if "INSERT" in query.upper() else result
-    
+                affected_rows = cur.rowcount
+                conn.commit()
+                return affected_rows
+
     except Exception as e:
-        print(f"Database error: {str(e)}")
-        raise e
-    
+        print(f"❌ Query execution error: {e}")
+        return None
     finally:
-        # Close the connection
-        if conn:
-            await conn.close()
+        conn.close()
+
 
 def upload_file_to_supabase(file_obj: io.BytesIO, file_name: str):
     """

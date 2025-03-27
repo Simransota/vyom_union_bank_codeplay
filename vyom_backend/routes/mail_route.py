@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import List, Dict, Any
+from pydantic import BaseModel,Field
+from typing import List, Dict, Any,Optional
 from datetime import datetime
 import pytz
 from celery.result import AsyncResult
@@ -18,13 +18,13 @@ router = APIRouter(
 class SMSParams(BaseModel):
     phone_number: str
     message: str
-    send_datetime: str = None  # Optional for scheduling
+    send_datetime: Optional[str]  =Field(default="2025-03-27T20:26:00+0530" , description="The time at which the email should be sent in %Y-%m-%dT%H:%M:%S%z")
 
 class NotificationParams(BaseModel):
     device_id: str
     title: str
     message: str
-    send_datetime: str = None  # Optional for scheduling
+    send_datetime: Optional[str]  =Field(default="2025-03-27T20:26:00+0530" , description="The time at which the email should be sent in %Y-%m-%dT%H:%M:%S%z")
 
 
 class MailParams(BaseModel):
@@ -33,7 +33,7 @@ class MailParams(BaseModel):
     to_recipients: List[str]
     cc_recipients: List[str] = []
     bcc_recipients: List[str] = []
-    send_datetime: str  # Expect timezone-aware datetime
+    send_datetime: Optional[str]  =Field(default="2025-03-27T20:26:00+0530" , description="The time at which the email should be sent in %Y-%m-%dT%H:%M:%S%z")
 
 class MailResponse(BaseModel):
     status: str = "success"

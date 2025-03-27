@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from src.utils import execute_query
 from src.query_function import process_query_and_save
-from src.utils import redis_client
+from src.config import redis_client
 from datetime import datetime 
 class QueryRequest(BaseModel):
     query: str
@@ -76,19 +76,3 @@ async def process_query(request_data: QueryRequest) -> Dict[str, Any]:
             "status": "error",
             "message": str(e)
         }
-    
-@router.post('/process_q/')
-async def process_query() -> Dict[str, Any]:
-    """Processes a query and saves it to the database"""
-    return {
-            "success": True,
-            "data":{
-            "query_id": 25,
-            "employee_name": "Ritu Malhotra",
-            "employee_id":1028,
-            "description":"Want to increase my credit card limit.",
-            "title":"Increase Credit Limit",
-            "job_role":"Credit Officer",
-            "last_updated":datetime.now()
-            }
-    }

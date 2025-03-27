@@ -70,7 +70,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 # Check Redis connection
-print(f"Redis connection active: {is_redis_active(redis_client)}")
+print(f"Redis connection active: {is_redis_active()}")
 
 @app.get("/")
 async def get_root():
@@ -79,7 +79,7 @@ async def get_root():
         "data": {
             "message": "Banking API Running",
             "docs": "/docs",
-            "redis_status": is_redis_active(redis_client),
+            "redis_status": is_redis_active(),
             "version": "1.0.0"
         }
     }

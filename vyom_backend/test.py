@@ -15,7 +15,7 @@ from src.config import redis_client
 #     cc_recipients=[],
 #     bcc_recipients=[]
 # )
-print(is_redis_active(redis_client))
+print(is_redis_active())
 # Schedule email time
 send_datetime = datetime.strptime("2025-03-09T22:30:00+05:30", "%Y-%m-%dT%H:%M:%S%z")
 send_datetime_utc = send_datetime.astimezone(pytz.utc)

@@ -16,8 +16,8 @@ from src.email_send import send_dynamic_email
 # from src.sms_send import send_notification,send_sms
 from src.sms_send import send_sms
 from typing import List
-from src.config import redis_client
-from src.utils import execute_query
+from src.config import sync_redis_client
+from src.utils import execute_query_sync as execute_query
 
 QUEUE_NAME = 'query_queue'
 
@@ -76,12 +76,12 @@ def send_mail(subject: str, body: str, to_recipients: List[str] = None, cc_recip
 @celery_app.task
 def apply_aging_to_queue():
     """Increments priority of all queries in Redis every 30 sec."""
-    pipe = redis_client.pipeline()
+    pipe = sync_redis_client.pipeline()
     cursor = 0
     AGING_INCREMENT = 0.2
 
     while True:
-        cursor, queries = redis_client.zscan(QUEUE_NAME, cursor, count=500)
+        cursor, queries = sync_redis_client.zscan(QUEUE_NAME, cursor, count=500)
         for query_id, _ in queries:
             pipe.zincrby(QUEUE_NAME, AGING_INCREMENT, query_id)
         pipe.execute()
@@ -127,7 +127,7 @@ def process_next_query(self):
             break
             
         # Get highest priority query
-        query = redis_client.zpopmax(QUEUE_NAME)
+        query = sync_redis_client.zpopmax(QUEUE_NAME)
         if not query:
             break  # Queue is empty
             
@@ -151,7 +151,7 @@ def process_next_query(self):
             # Log error
             print(f"Error processing query {query_id}: {str(e)}")
             # Re-add to queue with slightly lower priority if needed
-            # redis_client.zadd(QUEUE_NAME, {str(query_id): priority - 0.1})
+            # sync_redis_client.zadd(QUEUE_NAME, {str(query_id): priority - 0.1})
     # send firebase notification    
     return f"Processed {processed_count} queries"
 
