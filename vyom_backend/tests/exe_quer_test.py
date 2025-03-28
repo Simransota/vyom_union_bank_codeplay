@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # ✅ First Run: Fetch from Database
     print("\n🚀 Running first query (DB expected)...")
-    result_1 = execute_query_sync(query, params, use_cache=True, cache_key=cache_key, cache_expiry=3600)
+    result_1 = execute_query_sync(query, params, use_cache=False, cache_key=cache_key, cache_expiry=3600)
     print("Query Result (DB Fetch):", result_1)
 
     # ✅ Second Run: Should Fetch from Redis Cache

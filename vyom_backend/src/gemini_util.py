@@ -59,7 +59,7 @@ Query (Properties: query_id, query_level, complete_time, waiting_time, redirecte
 Department (Properties: dept_id, dept_name, employee_cnt)
 Category (Properties: category_id, name)
 SubDepartment (Properties: subdept_id, name)
-Customer (Properties: customer_id, customer_name, balance, cbil, age, customer_loc)
+Customer (Properties: customer_id, customer_name, balance, cbil, age, customer_loc,email,phone_no,push_enabled,join_date)
 Relationships:
 
 (Employee)-[:WORKS_AT]->(Branch)

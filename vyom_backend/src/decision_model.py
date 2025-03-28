@@ -210,60 +210,6 @@ class BankingQueryAssignmentSystem:
         
         return customer_history
     
-    async def get_customer_priority(self, cust_id):
-        """Calculate customer priority score on scale of 0-100 based on 1-10 input priority"""
-        try:
-            # Get customer data from Supabase
-            customer_response = await self.supabase.table("customer").select("*").eq("cust_id", cust_id).execute()
-            
-            if not customer_response.data:
-                return 40  # Default mid-level priority
-                
-            customer_data = customer_response.data[0]
-            
-            # Map your 1-10 priority to 0-100 scale
-            # You can adjust this calculation based on your business rules
-            priority_level = customer_data.get('priority_level', 5)
-            credit_score = customer_data.get('credit_score', 650)
-            bank_balance = customer_data.get('bank_balance', 5000)
-            
-            # Calculate account age in days if join_date exists
-            account_age_days = 365  # Default 1 year
-            if 'join_date' in customer_data and customer_data['join_date']:
-                join_date = datetime.fromisoformat(customer_data['join_date'].replace('Z', '+00:00'))
-                account_age_days = (datetime.now() - join_date).days
-            
-            # Basic priority calculation
-            credit_weight = 0.3
-            balance_weight = 0.3
-            tenure_weight = 0.2
-            priority_weight = 0.2
-            
-            # Normalize values to 0-100 range
-            # Assuming credit score is 300-850
-            norm_credit = (credit_score - 300) / 550 * 100
-            
-            # Assuming bank_balance caps at 100,000 for priority purposes
-            norm_balance = min(bank_balance / 100000 * 100, 100)
-            
-            # Tenure - capped at 5 years (1825 days)
-            norm_tenure = min(account_age_days / 1825 * 100, 100)
-            
-            # Priority level from 1-10 to 0-100
-            norm_priority = priority_level * 10
-            
-            priority_score = (
-                credit_weight * norm_credit + 
-                balance_weight * norm_balance + 
-                tenure_weight * norm_tenure +
-                priority_weight * norm_priority
-            )
-            return min(round(priority_score, 1), 100)
-        except Exception as e:
-            print(f"Error calculating customer priority: {e}")
-            # Default to medium priority in case of error
-            return 40
-    
     async def find_historical_match(self, cust_id, dept, sub_branch):
         """Find employees with good history with this customer in same department"""
         history = await self.load_customer_history(cust_id)
@@ -469,84 +415,7 @@ class BankingQueryAssignmentSystem:
             employees.loc[employees['employee_tier'] == 3, 'suitability_score'] += 15
         
         return employees.sort_values(by='suitability_score', ascending=False)
-    
-    async def ml_content_similarity(self, query_id):
-        """ML enhancement: Find employees with experience in similar queries"""
-        try:
-            # Get current query text
-            current_query_response = await self.supabase.table("query").select("title,description,categories,subtype").eq("query_id", query_id).execute()
-            
-            if not current_query_response.data:
-                return None
-                
-            current_query = pd.DataFrame([current_query_response.data[0]])
-            
-            # Get past queries and their assigned employees
-            past_queries_response = await self.supabase.table("query").select("title,description,categories,subtype,employee").not_.is_("employee", "null").execute()
-            
-            if not past_queries_response.data:
-                return None
-                
-            past_queries = pd.DataFrame(past_queries_response.data)
-            
-            # Get ratings from appointments
-            ratings_response = await self.supabase.table("appointment").select("query_id,rating").not_.is_("rating", "null").execute()
-            
-            if not ratings_response.data:
-                return None
-                
-            ratings = pd.DataFrame(ratings_response.data)
-            
-            # Merge past queries with ratings
-            past_data = pd.merge(past_queries, ratings, on='query_id', how='inner')
-            
-            # Only consider highly rated assignments
-            past_data = past_data[past_data['rating'] >= 4.0]
-            
-            if past_data.empty:
-                return None
-                
-            # Create text features from query text and metadata
-            all_queries = pd.concat([
-                current_query.assign(is_current=True), 
-                past_data[['title', 'description', 'categories', 'subtype']].assign(is_current=False)
-            ])
-            
-            # Combine all text fields
-            all_queries['text'] = ''
-            for col in ['title', 'description', 'categories', 'subtype']:
-                all_queries['text'] += all_queries[col].fillna('') + ' '
-            
-            # Transform text to TF-IDF features
-            vectorizer = TfidfVectorizer(max_features=1000, stop_words='english')
-            tfidf_matrix = vectorizer.fit_transform(all_queries['text'])
-            
-            # Get the current query vector (first row)
-            current_vector = tfidf_matrix[0:1]
-            
-            # Get past query vectors
-            past_vectors = tfidf_matrix[1:]
-            
-            # Calculate cosine similarity
-            similarities = cosine_similarity(current_vector, past_vectors).flatten()
-            
-            # Get top 5 most similar queries
-            past_data['similarity'] = similarities
-            top_similar = past_data.sort_values('similarity', ascending=False).head(5)
-            
-            # Weight employees by similarity * rating
-            top_similar['weighted_score'] = top_similar['similarity'] * top_similar['rating']
-            
-            # Group by employee and sum weighted scores
-            emp_scores = top_similar.groupby('employee')['weighted_score'].sum().reset_index()
-            
-            if not emp_scores.empty:
-                return emp_scores.sort_values('weighted_score', ascending=False)['employee'].iloc[0]
-            return None
-        except Exception as e:
-            print(f"Error in ML similarity calculation: {e}")
-            return None
-            
+
     async def assign_query(self, query_data):
         """Main method to assign an employee to a query"""
         # Extract query_id and customer_id

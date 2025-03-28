@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any,Optional
 from src.utils import execute_query
 from src.query_function import process_query_and_save
 from src.config import redis_client
@@ -9,6 +9,9 @@ from datetime import datetime
 class QueryRequest(BaseModel):
     query: str
     user_id: str
+    latitude: float = 19.2499702
+    longitude: float = 72.8593873
+    language: Optional[str] = "Hindi"
 
 router = APIRouter(
     prefix="/query",
@@ -25,7 +28,6 @@ class QueryParams(BaseModel):
 class QueryResponse(BaseModel):
     status: str
     query_id: int = None
-    message: str = None
 
 @router.post('/send/', response_model=QueryResponse)
 async def send_query(params: QueryParams) -> Dict[str, Any]:
@@ -49,14 +51,16 @@ async def process_query(request_data: QueryRequest) -> Dict[str, Any]:
     try:
         query = request_data.query
         user_id = request_data.user_id
-        
+        latitude = request_data.latitude
+        longitude = request_data.longitude
+        language = request_data.language
         if not query or not user_id:
             return {
                 "status": "error",
                 "message": "Missing required parameters: query and user_id"
             }
             
-        result = process_query_and_save(query, user_id)
+        result = process_query_and_save(query, user_id,latitude,longitude,language)
         
         # Check if result contains a valid query_id
         query_id = result.get("query_id")

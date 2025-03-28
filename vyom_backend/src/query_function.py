@@ -1,121 +1,128 @@
-banking_map = {
-    "Credit": {
-        "sub_branches": [
-            "Retail Loans",
-            "Corporate Loans",
-            "Credit Cards",
-            "Mortgage & Secured Loans",
-            "Microfinance & Agricultural Loans"
-        ],
-        "categories": [
-            "Home Loan",
-            "Car Loan",
-            "Personal Loan",
-            "Education Loan",
-            "Loan Against Property",
-            "Working Capital Loan",
-            "Credit Limit Increase",
-            "Reward Points Inquiry"
-        ]
-    },
-    "General Banking": {
-        "sub_branches": [
-            "Accounts & Deposits",
-            "Transactions & Payments",
-            "Cards & Banking Services",
-            "KYC & Documentation",
-            "Banking Tech & Digital Services"
-        ],
-        "categories": [
-            "Savings Account",
-            "Current Account",
-            "Fixed Deposit",
-            "Recurring Deposit",
-            "NEFT/RTGS/IMPS Issue",
-            "Debit Card Activation",
-            "Lost/Stolen Card",
-            "Net Banking Login Issue",
-            "Mobile Banking Issue"
-        ]
-    },
-    "Forex": {
-        "sub_branches": [
-            "Currency Exchange",
-            "International Transactions",
-            "Trade Finance",
-            "Foreign Investments & NRI Banking"
-        ],
-        "categories": [
-            "Foreign Exchange Rates Inquiry",
-            "Cash Currency Exchange",
-            "SWIFT Transfer",
-            "Letter of Credit",
-            "Bank Guarantee",
-            "NRE/NRO Account Opening",
-            "Repatriation of Funds"
-        ]
-    },
-}
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate,ChatPromptTemplate
 import json
-from src.utils import execute_query
+from datetime import datetime
+import math
 from datetime import datetime
 import json
 import os
 import io
 from typing import Dict,Any
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 import datetime
 import os
 from pathlib import Path        
 import random
-from src.utils import upload_file_to_supabase
+from src.utils import upload_file_to_supabase,banking_map,QueryRequest,execute_cypher_query,execute_query_sync,initial_insertion_query_neo4j
 load_dotenv()
-from datetime import datetime
+import datetime
 # Initialize the Google PaLM LLM
 gemini_api_key=os.environ.get("GEMINI_API_KEY")
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)
+graphdb_url = os.environ.get("NEO4J_URI")
+username = 'neo4j'
+password = os.environ.get("NEO4J_PASSWORD")
 
-# Create a prompt template
-template = """
-You are a Bank employee and have 3 tasks:
-1> Generate a Title and a short concise description summary for the following query dont put external information:
-2> Assign it a query complexity level as follows:
-    0:For basic queries which can be given via RAG or a DB function eg:What are the bank timings
-    1:For queries requiring an solvable via a chat eg: What is the interest rate on my savings account
-    2.For queries having functionality questions and requiring a voice/video call:eg recommend me a credit card for travel purpose
-    3:For queries requiring an immediate assistace via a video/voice call eg:The person has lost his credit card and wants to block it
-3> Analyse the sentiment of the query from enum of ['ANGRY', 'IMPATIENT', 'NEUTRAL', 'HAPPY', 'CURIOUS','WORRIED']   
-return in json format without /n
-"title":,"description","query complexity":
-{query}
-"""
+def get_customer_priority(cust_id, query_priority):
+    """Calculate customer priority score on a scale of 1-20, using Gaussian distribution for age."""
+    try:
+        # Get customer data from Supabase
+        customer_response = execute_query_sync()
+        
+        if not customer_response.data:
+            return 10  # Default mid-level priority (1-20 scale)
+            
+        customer_data = customer_response.data[0]
+        
+        # Map priority (1-10) to (1-20) scale
+        priority_level = query_priority if query_priority is not None else 5
+        credit_score = customer_data.get('cred_score', 650)  # Fix field name
+        bank_balance = float(customer_data.get('bank_balance', 5000))  # Ensure float
+        dob = customer_data.get('dob')
+        
+        # Calculate account age in days if join_date exists
+        account_age_days = 365  # Default to 1 year
+        if 'join_date' in customer_data and customer_data['join_date']:
+            join_date = datetime.fromisoformat(customer_data['join_date'].replace('Z', '+00:00'))
+            account_age_days = (datetime.utcnow() - join_date).days
 
-prompt = PromptTemplate(template=template, input_variables=["query"])
+        # Calculate user age if DOB exists
+        user_age = 30  # Default age
+        if dob:
+            birth_date = datetime.strptime(dob, "%Y-%m-%d")
+            user_age = (datetime.utcnow() - birth_date).days // 365  # Convert days to years
+        
+        # Define weightage for each factor
+        credit_weight = 0.25
+        balance_weight = 0.25
+        tenure_weight = 0.15
+        priority_weight = 0.15
+        age_weight = 0.2  # Age weightage
 
-# Replace deprecated LLMChain with RunnableSequence
-query_chain = prompt | llm
+        # Normalize values to 0-100 range
+        norm_credit = (credit_score - 300) / 550 * 100  # Credit Score (300-850)
+        norm_balance = min(bank_balance / 100000 * 100, 100)  # Bank balance (Capped at 100,000)
+        norm_tenure = min(account_age_days / 1825 * 100, 100)  # Tenure (Capped at 5 years)
+        norm_priority = priority_level * 10  # Priority level (1-10 to 0-100)
+        
+        # Age Normalization (Gaussian Curve with peak at 36)
+        age_mean = 36  # Peak at 36 years old
+        age_std_dev = 10  # Spread (10 years)
+        norm_age = math.exp(-((user_age - age_mean) ** 2) / (2 * age_std_dev ** 2)) * 100  # Gaussian Function
+
+        # Calculate raw priority score (0-100 range)
+        raw_priority_score = (
+            credit_weight * norm_credit +
+            balance_weight * norm_balance +
+            tenure_weight * norm_tenure +
+            priority_weight * norm_priority +
+            age_weight * norm_age  # Gaussian-based age score
+        )
+        
+        # Convert raw score (0-100) to (1-20) scale
+        priority_1_20 = max(1, min(round(raw_priority_score / 5), 20))
+        
+        return priority_1_20
+    except Exception as e:
+        print(f"Error calculating customer priority: {e}")
+        return 10  # Default mid-level priority in case of error
 
 def generate_query_description(user_query):
     """
     Generate a description for a user query using Gemini model.
-    
-    Args:
-        user_query (str): The user's query text
-        
-    Returns:
-        str: JSON formatted description of the query
     """
-    # Replace llm_chain.run with query_chain.invoke and extract content
-    response = query_chain.invoke({"query": user_query})
-    # For ChatGoogleGenerativeAI, we need to extract the content from the response
-    if hasattr(response, 'content'):
-        return response.content
-    return response
+    template = """
+    You are a Bank employee and have 3 tasks:
+    1> Generate a Title and a short concise description summary for the following query dont put external information:
+    2> Assign it a query complexity level as follows:
+        0:For basic queries which can be given via RAG or a DB function eg:What are the bank timings
+        1:For queries requiring an solvable via a chat eg: What is the interest rate on my savings account
+        2.For queries having functionality questions and requiring a voice/video call:eg recommend me a credit card for travel purpose
+        3:For queries requiring an immediate assistace via a video/voice call eg:The person has lost his credit card and wants to block it
+    3> Analyse the sentiment of the query from enum of ['ANGRY', 'IMPATIENT', 'NEUTRAL', 'HAPPY', 'CURIOUS','WORRIED']   
+    return in given format without json formatting
+    {{
+        "title":,
+        "description":,
+        "query_complexity":,
+        "sentiment":
+    }}
+    {query}
+    """
+
+    prompt = PromptTemplate(template=template, input_variables=["query"])
+    query_chain = prompt | llm
+
+    try:
+        response = query_chain.invoke({"query": user_query})
+        if hasattr(response, 'content') and response.content:
+            return response.content
+        else:
+            raise ValueError("Empty response from Gemini model")
+    except Exception as e:
+        print(f"Error generating query description: {e}")
+        return ValueError
 
 def classify_banking_query(query: str) -> Dict[str, Any]:
     """
@@ -139,9 +146,7 @@ def classify_banking_query(query: str) -> Dict[str, Any]:
     Customer query: "{query}"
     """
     prompt_main = ChatPromptTemplate.from_template(template_main)
-    # Replace LLMChain with RunnableSequence
     chain_main = prompt_main | llm
-    # Replace .run() with .invoke()
     main_branch = chain_main.invoke({"query": query, "main_branches": main_branches_str}).content.strip()
     
     # Step 2: Determine sub-branches and categories based on main branch
@@ -155,9 +160,9 @@ def classify_banking_query(query: str) -> Dict[str, Any]:
     categories_str = ", ".join(branch_info["categories"])
 
     template_sub = """You are an expert banking query classifier. Based on the customer query and the definitions provided below 
-    for the main branch "{main_branch}", identify the most relevant sub-branches and categories. 
+    for the main branch "{main_branch}", identify the most relevant sub-branche and categories. 
     Return your answer as a JSON object with keys "sub_branches" and "categories", where the values are lists of strings. 
-    Only include at max most relevant 2 sub-branches IF required and categories that are directly relevant to the query.
+    Only include at max most relevant sub-branch and as many categories that are directly relevant to the query.
 
     Definitions for {main_branch}:
     Sub-Branches: {sub_branches}
@@ -290,10 +295,10 @@ def predict_resolution_time(priority_score, dept, sub_dept, service_level):
     
     return interval_string
 
-def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
+
+def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitude:float,language:str) -> Dict[str, Any]:
     """
     Process a customer query and save it to the database.
-    
     Args:
         query_text (str): The customer's query text
         cust_id (str): Customer UUID from database
@@ -308,21 +313,18 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
         description_result = generate_query_description(query_text)
         try:
             if isinstance(description_result, str):
+                description_result = description_result.strip()
                 description_data = json.loads(description_result)
             else:
                 description_data = description_result
                 
-            title = description_data.get("title", "Untitled Query")
-            description = description_data.get("description", query_text[:100])
-            query_complexity = int(description_data.get("query complexity", 1))
+            title = description_data.get("title")
+            description = description_data.get("description")
+            query_complexity = int(description_data.get("query_complexity"))
             query_sentiment = description_data.get("sentiment")
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             print(f"Error parsing description result: {e}")
-            title = "Untitled Query"
-            description = query_text[:100]
-            query_complexity = 1
-            query_sentiment = "NEUTRAL"
-            
+        
         # Step 2: Classify the query (department, sub-department, categories)
         classification = classify_banking_query(query_text)
         department_name = classification.get("main_branch")
@@ -353,6 +355,8 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
         # For resolution time calculation, use the first subdepartment if multiple exist
         calculation_sub_dept = sub_branches[0]
         
+        # Get the location of the user
+        geography = f"SRID=4326;POINT({longitude} {latitude})"  # WKT format for geography
         # Handle case where sub_dept is not in base_times
         try:
             estimated_time = predict_resolution_time(
@@ -368,16 +372,9 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
         # Create activity logs as JSON string
         activity_logs = json.dumps([{
             "timestamp": current_time.isoformat(),
-            "action": "Query Created",
-            "details": "Customer query received and processed"
+            "action": "Query received",
+            "status": "Pending",
         }])
-        
-        # Create additional details as JSON string
-        additional_details = json.dumps({
-            "categories": categories,
-            "sub_branches": sub_branches,
-            "original_query": query_text
-        })
         
         # Format date_time as ISO string
         date_time_str = current_time.isoformat()
@@ -410,12 +407,13 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             db_sentiment,              # query_sentiment (text)
             date_time_str,             # date_time (timestamp)
             activity_logs,             # activity_logs (jsonb)
-            additional_details         # additional_details (jsonb)
+            language,                  # language (text)
+            geography                  # location (geography
         )
         
         # SQL query with proper column order matching params
         query = """
-        INSERT INTO query (
+            INSERT INTO query (
             cust_id,
             title,
             description,
@@ -430,32 +428,32 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             query_sentiment,
             date_time,
             activity_logs,
-            additional_details
+            language,
+            location
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-        ) RETURNING query_id, date_time, status,query_level;
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,ST_GeomFromText(%s)
+        ) RETURNING query_id;
         """
-        
+        # Query 1 to make the query node
         try:
-            # Execute the query
-            result = execute_query(query, params,return_id=True)
-            print(result)
-            if isinstance(result, int):
-                query_id = result
+            queryobj = QueryRequest(query=query,params=params,use_cache=False,cache_key=None,cache_expiry=3600,return_id=True)
+            result = execute_query_sync(queryobj)
+            cypher_queries = initial_insertion_query_neo4j(result, query_complexity, date_time_str, estimated_time, priority_level, language, db_sentiment, categories_str, sub_dept, department_name, cust_id)
+            for cypy in cypher_queries:
+                execute_cypher_query(cypy, graphdb_url, username, password)
+            if result:
+                return {
+                "success": True,
+                "message": "Query processed and saved successfully",
+                "query_id":result
+            }
             else:
                 # Log this issue
                 print(f"Warning: execute_query did not return an integer ID: {result}")
                 query_id = None
-
             return {
-                "success": True,
-                "query_id": query_id,
-                "employee_name": "Ritu Malhotra",
-                "employee_id":1028,
-                "description":"Want to increase my credit card limit.",
-                "title":"Increase Credit Limit",
-                "job_role":" Credit Officer",
-                "last_updated":datetime.now(),
+                "success": False,
+                "message": "Error processing the query in db",
             }
         except Exception as db_error:
             print(f"Database error: {str(db_error)}")
@@ -474,76 +472,3 @@ def process_query_and_save(query_text: str, cust_id: str) -> Dict[str, Any]:
             "error": str(e),
             "status_code": 500
         }
-
-def get_function_return_types():
-    """
-    Returns a JSON structure documenting the return types of all major functions in this module.
-    This helps with debugging and integration.
-    """
-    return {
-        "generate_query_description": {
-            "description": "Generates a description for a user query using Gemini model",
-            "return_type": "str (JSON string)",
-            "example_return": {
-                "title": "Credit Card Limit Increase",
-                "description": "Request to increase credit limit for upcoming expenses",
-                "query complexity": 2,
-                "sentiment": "NEUTRAL"
-            },
-            "possible_issues": "May return malformed JSON requiring additional parsing"
-        },
-        
-        "classify_banking_query": {
-            "description": "Classifies a query into banking branches, sub-branches, and categories",
-            "return_type": "Dict[str, Any]",
-            "example_return": {
-                "main_branch": "Credit",
-                "sub_branches": ["Credit Cards", "Retail Loans"],
-                "categories": ["Credit Limit Increase"]
-            },
-            "possible_issues": "May return empty lists for sub_branches or categories if classification fails"
-        },
-        
-        "store_query_as_file": {
-            "description": "Stores user query as a file in Supabase storage",
-            "return_type": "Dict[str, Any]",
-            "example_success_return": {
-                "success": True,
-                "url": "https://example.storage.com/files/query_12345.txt"
-            },
-            "example_error_return": {
-                "success": False,
-                "error": "Failed to upload file: permission denied"
-            }
-        },
-        
-        "predict_resolution_time": {
-            "description": "Predicts query resolution time based on priority and other factors",
-            "return_type": "str (PostgreSQL interval format)",
-            "example_return": "00:45:30",  # 45 minutes, 30 seconds
-            "possible_error_return": "Department 'Unknown' not recognized.",
-            "format": "HH:MM:SS"
-        },
-        
-        "process_query_and_save": {
-            "description": "Main function that processes a query and saves it to database",
-            "return_type": "Dict[str, Any]",
-            "example_success_return": {
-                "success": True,
-                "message": "Query processed and saved successfully",
-                "query_id": 12345,
-                "status_code": 201
-            },
-            "example_error_return": {
-                "success": False,
-                "message": "Failed to insert query into database",
-                "error": "duplicate key value violates unique constraint",
-                "status_code": 500
-            }
-        }
-    }
-
-# Call this function to print the return types during debugging
-if __name__ == "__main__":
-    import json
-    print(json.dumps(get_function_return_types(), indent=4))
