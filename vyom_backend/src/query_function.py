@@ -2,9 +2,7 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate,ChatPromptTemplate
 import json
-from datetime import datetime
 import math
-from datetime import datetime
 import json
 import os
 import io
@@ -16,7 +14,6 @@ from pathlib import Path
 import random
 from src.utils import upload_file_to_supabase,banking_map,QueryRequest,execute_cypher_query,execute_query_sync,initial_insertion_query_neo4j
 load_dotenv()
-import datetime
 # Initialize the Google PaLM LLM
 gemini_api_key=os.environ.get("GEMINI_API_KEY")
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=gemini_api_key)
@@ -28,31 +25,31 @@ def get_customer_priority(cust_id, query_priority):
     """Calculate customer priority score on a scale of 1-20, using Gaussian distribution for age."""
     try:
         # Get customer data from Supabase
-        customer_response = execute_query_sync()
-        
-        if not customer_response.data:
+        request = QueryRequest(
+            query="SELECT bank_balance,cred_score,dob,join_date FROM customer WHERE cust_id = %s",params=(cust_id,),
+            use_cache=False, cache_key=None, cache_expiry=3600, return_id=False)
+        customer_response = execute_query_sync(request)
+        if not customer_response:
             return 10  # Default mid-level priority (1-20 scale)
             
-        customer_data = customer_response.data[0]
-        
+        customer_data_list = customer_response
+        if customer_data_list:
+            customer_data = customer_data_list[0]
+            bank_balance = float(customer_data.get('bank_balance'))
+            credit_score = customer_data.get('cred_score')
+            dob = customer_data.get('dob')
+            join_date = customer_data.get('join_date')
+        else:
+            return ("error", "No customer data found")
         # Map priority (1-10) to (1-20) scale
-        priority_level = query_priority if query_priority is not None else 5
-        credit_score = customer_data.get('cred_score', 650)  # Fix field name
-        bank_balance = float(customer_data.get('bank_balance', 5000))  # Ensure float
-        dob = customer_data.get('dob')
-        
-        # Calculate account age in days if join_date exists
-        account_age_days = 365  # Default to 1 year
-        if 'join_date' in customer_data and customer_data['join_date']:
-            join_date = datetime.fromisoformat(customer_data['join_date'].replace('Z', '+00:00'))
-            account_age_days = (datetime.utcnow() - join_date).days
+        priority_level = query_priority if query_priority is not None else 5        
+        account_age_days = (datetime.datetime.now(datetime.timezone.utc) - join_date).days
 
         # Calculate user age if DOB exists
-        user_age = 30  # Default age
         if dob:
-            birth_date = datetime.strptime(dob, "%Y-%m-%d")
-            user_age = (datetime.utcnow() - birth_date).days // 365  # Convert days to years
-        
+            today = datetime.datetime.now(datetime.timezone.utc).date()
+            birth_date = datetime.datetime(dob.year, dob.month, dob.day).date()
+            user_age = (today - birth_date).days // 365  # Convert days to years
         # Define weightage for each factor
         credit_weight = 0.25
         balance_weight = 0.25
