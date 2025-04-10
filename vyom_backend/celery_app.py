@@ -3,7 +3,7 @@ eventlet.monkey_patch()
 
 # Import environment manager first
 from src.env_manager import init_success
-
+from src.assign_employee import assign_employee
 if not init_success:
     import sys
     print("Failed to initialize environment for Celery. Exiting...")
@@ -57,6 +57,26 @@ celery_app.conf.update(
     beat_schedule_filename=os.path.join(logs_dir, 'celerybeat-schedule'),
 )
 
+# Add a task to the QUEUE_NAME queue (query_queue)
+def add_query_to_queue(query_id, priority):
+    """
+    Add a query to the query_queue with the given priority.
+    
+    Args:
+        query_id: The ID of the query to process
+        priority: Priority score (higher = more important)
+    
+    Returns:
+        bool: True if added successfully, False otherwise
+    """
+    try:
+        # Add query to the Redis sorted set with priority as score
+        sync_redis_client.zadd(QUEUE_NAME, {str(query_id): float(priority)})
+        print(f"Added query {query_id} to queue with priority {priority}")
+        return True
+    except Exception as e:
+        print(f"Error adding query to queue: {str(e)}")
+        return False
 
 @celery_app.task
 def send_mail(subject: str, body: str, to_recipients: List[str] = None, cc_recipients: List[str] = None, bcc_recipients: List[str] = None):
@@ -127,32 +147,22 @@ def process_next_query(self):
             break
             
         # Get highest priority query
-        query = sync_redis_client.zpopmax(QUEUE_NAME)
-        if not query:
+        result = sync_redis_client.zpopmax(QUEUE_NAME)
+        if not result:
             break  # Queue is empty
             
-        query_id, priority = query[0].decode(), query[1]
-        
+        query_id, priority = result[0], result[1]
+        query_id = query_id.decode('utf-8')
         try:
             # Fetch and process query
-            query_data = execute_query("SELECT * FROM queries WHERE id = %s", (query_id,))
-            if not query_data:
-                continue
-                
-            query_data = query_data[0]
-            
-            # Your processing logic here
-            print(f"Processing Query: {query_data} with priority {priority}")
-            # Simulate processing Actual matchmaking code
-            # Adjust based on actual processing time
-            
+            result= assign_employee(query_id, priority)
+            if result:
+                print(f"Processing Query: {query_id} with priority {priority}")
+
             processed_count += 1
         except Exception as e:
             # Log error
             print(f"Error processing query {query_id}: {str(e)}")
-            # Re-add to queue with slightly lower priority if needed
-            # sync_redis_client.zadd(QUEUE_NAME, {str(query_id): priority - 0.1})
-    # send firebase notification    
     return f"Processed {processed_count} queries"
 
 celery_app.conf.beat_schedule = {

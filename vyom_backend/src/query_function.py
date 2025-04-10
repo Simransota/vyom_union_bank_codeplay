@@ -6,8 +6,9 @@ import math
 import json
 import os
 import io
-from typing import Dict,Any
+from typing import Dict,Any,Optional
 from dotenv import load_dotenv
+from celery_app import add_query_to_queue
 import datetime
 import os
 from pathlib import Path        
@@ -28,11 +29,8 @@ def get_customer_priority(cust_id, query_priority):
         request = QueryRequest(
             query="SELECT bank_balance,cred_score,dob,join_date FROM customer WHERE cust_id = %s",params=(cust_id,),
             use_cache=False, cache_key=None, cache_expiry=3600, return_id=False)
-        customer_response = execute_query_sync(request)
-        if not customer_response:
-            return 10  # Default mid-level priority (1-20 scale)
-            
-        customer_data_list = customer_response
+        customer_data_list = execute_query_sync(request)
+        # Extract customer data
         if customer_data_list:
             customer_data = customer_data_list[0]
             bank_balance = float(customer_data.get('bank_balance'))
@@ -293,7 +291,7 @@ def predict_resolution_time(priority_score, dept, sub_dept, service_level):
     return interval_string
 
 
-def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitude:float,language:str) -> Dict[str, Any]:
+def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitude:float,language:str,schedule_time:Optional[datetime.datetime]) -> Dict[str, Any]:
     """
     Process a customer query and save it to the database.
     Args:
@@ -341,15 +339,8 @@ def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitud
         transcript_url = storage_result
 
         # Step 4: Calculate estimated resolution time
-        # Set priority based on complexity and sentiment
-        priority_level = min(10, max(1, 11 - query_complexity * 3))
-        if query_sentiment in ["ANGRY", "IMPATIENT"]:
-            priority_level = max(1, priority_level - 2)
-        elif query_sentiment in ["HAPPY"]:
-            priority_level = min(10, priority_level + 1)
-            
+        priority_level = get_customer_priority(cust_id, query_complexity)
         # Calculate resolution time in minutes
-        # For resolution time calculation, use the first subdepartment if multiple exist
         calculation_sub_dept = sub_branches[0]
         
         # Get the location of the user
@@ -375,7 +366,8 @@ def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitud
         
         # Format date_time as ISO string
         date_time_str = current_time.isoformat()
-        
+        if schedule_time:
+            schedule_time = schedule_time.isoformat()
         # Map sentiment to database values
         sentiment_mapping = {
             "ANGRY": "Negative",
@@ -405,7 +397,8 @@ def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitud
             date_time_str,             # date_time (timestamp)
             activity_logs,             # activity_logs (jsonb)
             language,                  # language (text)
-            geography                  # location (geography
+            geography,                  # location (geography)
+            schedule_time if schedule_time else None  # schedule_time (timestamp, optional)
         )
         
         # SQL query with proper column order matching params
@@ -426,9 +419,10 @@ def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitud
             date_time,
             activity_logs,
             language,
-            location
+            location,
+            schedule_time
         ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,ST_GeomFromText(%s)
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,%s,ST_GeomFromText(%s),%s
         ) RETURNING query_id;
         """
         # Query 1 to make the query node
@@ -438,6 +432,7 @@ def process_query_and_save(query_text: str, cust_id: str,latitude:float,longitud
             cypher_queries = initial_insertion_query_neo4j(result, query_complexity, date_time_str, estimated_time, priority_level, language, db_sentiment, categories_str, sub_dept, department_name, cust_id)
             for cypy in cypher_queries:
                 execute_cypher_query(cypy, graphdb_url, username, password)
+            add_query_to_queue(result,priority_level)
             if result:
                 return {
                 "success": True,
